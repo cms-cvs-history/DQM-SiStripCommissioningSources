@@ -10,7 +10,6 @@
 // dqm
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
 #include "DQM/SiStripCommissioningSources/test/stubs/SiStripHistoNamingSchemeMtcc.h"
-#include "DQM/SiStripCommon/interface/SiStripGenerateKey.h"
 // conditions
 #include "CondFormats/DataRecord/interface/SiStripFedCablingRcd.h"
 #include "CondFormats/SiStripObjects/interface/SiStripFedCabling.h"
@@ -19,6 +18,8 @@
 // data formats
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/SiStripDigi/interface/SiStripDigi.h"
+#include "DataFormats/SiStripDetId/interface/SiStripControlKey.h"
+#include "DataFormats/SiStripDetId/interface/SiStripReadoutKey.h"
 // tasks
 #include "DQM/SiStripCommissioningSources/test/stubs/PedestalsTaskMtcc.h"
 // std, utilities
@@ -28,6 +29,11 @@
 #include <sstream>
 #include <iomanip>
 
+#include <string>
+#include <map>
+
+
+using namespace std;
 // -----------------------------------------------------------------------------
 //
 CommissioningSourceMtcc::CommissioningSourceMtcc( const edm::ParameterSet& pset ) :
@@ -79,6 +85,7 @@ void CommissioningSourceMtcc::beginJob( const edm::EventSetup& setup ) {
   fedCabling_ = const_cast<SiStripFedCabling*>( fed_cabling.product() ); 
   fecCabling_ = new SiStripFecCabling( *fed_cabling );
   rightpairs=OrderedPairs(setup);
+
   // Create root directories according to control logical structure
   createDirs();
 
@@ -103,11 +110,7 @@ void CommissioningSourceMtcc::endJob() {
   for ( TaskMap::iterator itask = tasks_.begin(); itask != tasks_.end(); itask++ ) { 
     if ( itask->second ) { delete itask->second; }
   }
-
-
-
   task_.clear();
-
 }
 
 // -----------------------------------------------------------------------------
@@ -125,105 +128,81 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
  
   // Create commissioning task objects 
   if ( firstEvent_ ) { createTask( summary->task() ); firstEvent_ = false; }
-  //MP
-  edm::Handle< edm::DetSetVector<SiStripRawDigi> > raw;
  
-  //cout << "number of DetSet " << raw->size() << endl;
-  //for (edm::DetSetVector<SiStripRawDigi>::const_iterator idet=raw->begin(); idet<raw->end() ; idet++){
-    
-  //cout << "det id " << idet->id << endl;
-    
-  //}
-  
- //edm::Handle< edm::DetSetVector<SiStripDigi> > zs;
-  
+  edm::Handle< edm::DetSetVector<SiStripRawDigi> > raw;
+  //edm::Handle< edm::DetSetVector<SiStripDigi> > zs;
+
+  ///////////FIX me
+  //cout << "summary->fedReadoutMode() = " << summary->fedReadoutMode() << endl; 
+  event.getByLabel( inputModuleLabel_, "VirginRaw", raw );
+  /*
   if ( summary->fedReadoutMode() == SiStripEventSummary::VIRGIN_RAW ) {
     event.getByLabel( inputModuleLabel_, "VirginRaw", raw );
+    std::cout << " sono in virgin" << std::endl;
   } else if ( summary->fedReadoutMode() == SiStripEventSummary::PROC_RAW ) {
     event.getByLabel( inputModuleLabel_, "ProcRaw", raw );
-  } else if ( summary->fedReadoutMode() == SiStripEventSummary::SCOPE_MODE ) {
+    std::cout << " sono in processed" << std::endl; 
+ } else if ( summary->fedReadoutMode() == SiStripEventSummary::SCOPE_MODE ) {
     event.getByLabel( inputModuleLabel_, "ScopeMode", raw );
+    std::cout << " sono in scope" << std::endl;
   } else if ( summary->fedReadoutMode() == SiStripEventSummary::ZERO_SUPPR ) {
     //event.getByLabel( inputModuleLabel_, "ZeroSuppr", zs );
   } else {
     edm::LogError("CommissioningSourceMtcc") << "[CommissioningSourceMtcc::analyze]"
 					 << " Unknown FED readout mode!";
   }
-  
+  */
+  ////////////////////////
 
+  ///RIMUOVI
   //  cout<<"a1"<<endl;
   //unsigned int i=raw->size();
   //  cout<<"a2 "<< i<<endl;
-  edm::DetSetVector<SiStripRawDigi>::const_iterator iraw;
-  edm::DetSetVector<SiStripRawDigi>::const_iterator irawbeg=raw->begin();
-  edm::DetSetVector<SiStripRawDigi>::const_iterator irawend=raw->end();
-  for (iraw=irawbeg;iraw!=irawend;iraw++){
-    //nsigned int jk=(*iraw).id;
-    //    cout<<"DetId "<<jk<<endl;
-  }
+//   edm::DetSetVector<SiStripRawDigi>::const_iterator iraw;
+//   edm::DetSetVector<SiStripRawDigi>::const_iterator irawbeg=raw->begin();
+//   edm::DetSetVector<SiStripRawDigi>::const_iterator irawend=raw->end();
+//   for (iraw=irawbeg;iraw!=irawend;iraw++){
+//     unsigned int jk=(*iraw).id;
+//     cout<<"elenco DetId "<<jk<<endl;
+//   }
+  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
   // Generate FEC key (if FED cabling task)
   uint32_t fec_key = 0;
-/*  if ( cablingTask_ ) {
-    uint32_t id = summary->deviceId();
-    fec_key = SiStripGenerateKey::controlKey( 0,                 // FEC crate
-					      ((id>>27)&0x1F),   // FEC slot
-					      ((id>>23)&0x0F),   // FEC ring
-					      ((id>>16)&0x7F),   // CCU address
-					      ((id>> 8)&0xFF),   // CCU channel
-					      ((id>> 0)&0x03) ); // LLD channel
-    SiStripGenerateKey::ControlPath path = SiStripGenerateKey::controlPath( fec_key );
-    stringstream ss;
-    ss << "[CommissioningSourceMtcc::analyze]"
-       << " Device id: " << setfill('0') << setw(8) << hex << id << dec
-       << " FEC key: " << setfill('0') << setw(8) << hex << fec_key << dec
-//        << "   ::putenv( const_cast<char*>( userEnv_.c_str() ) );
-//   ::putenv( const_cast<char*>( passwdEnv_.c_str() ) );
-
-// crate/fec/ring/ccu/module/lld params: " 
-//        << path.fecCrate_ << "/"
-//        << path.fecSlot_ << "/"
-//        << path.fecRing_ << "/"
-       << path.ccuAddr_ << "/"
-       << path.ccuChan_ << "/"
-       << path.lldChan_;
-    LogDebug("Commissioning") << ss.str();
-  }  */    
   
-
-
   // Iterate through FED ids and channels
   vector<uint16_t>::const_iterator ifed;
   for ( ifed = fedCabling_->feds().begin(); ifed != fedCabling_->feds().end(); ifed++ ) {
     for ( uint16_t ichan = 0; ichan < 96; ichan++ ) {
       // Create FED key and check if non-zero
-      uint32_t fed_key = SiStripGenerateKey::fedKey( *ifed, ichan );
-      //      cout << " fed key   " << fed_key << endl;
+      uint32_t fed_key = SiStripReadoutKey::key( *ifed, ichan );
+      //RIMUOVI
+      //cout << " fed key   " << fed_key << endl;
+      //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
       if ( fed_key ) { 
 	// Retrieve digis for given FED key and check if found
 	vector< edm::DetSet<SiStripRawDigi> >::const_iterator digis = raw->find( fed_key );
-
-	//	cout << "vediamo se ha trovato i digis..." << endl;
-
+	//RIMUOVI
+	//cout << "vediamo se ha trovato i digis..." << endl;
+	//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 	if ( digis != raw->end() ) { 
-	  //	  cout << " pare di si' " << endl;
+	  //RIMUOVI
+	  //cout << " pare di si' " << endl;
+	  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 	  // Fill histograms for given FEC or FED key, depending on commissioning task
-	    if ( tasks_.find(fed_key) != tasks_.end() ) { 
-	      //	      cout << "ok sta chiamando il fill " << endl;
-	      tasks_[fed_key]->fillHistograms( *summary, *digis );
-	    } else {
-	      cout << " qualcosa e' andato storto "<< endl;
-	      pair<uint32_t,uint32_t> fed_ch = SiStripGenerateKey::fedChannel( fec_key );
-	      stringstream ss;
-	      ss << "[CommissioningSourceMtcc::analyze]"
-		 << " Commissioning task with FED key " 
-		 << hex << setfill('0') << setw(8) << fed_key << dec
-		 << " and FED id/ch " 
-		 << fed_ch.first << "/"
-		 << fed_ch.second 
-		 << " not found in list!"; 
-	      edm::LogError("Commissioning") << ss.str();
-	    }
-	  
+	  if ( tasks_.find(fed_key) != tasks_.end() ) { 
+	    tasks_[fed_key]->fillHistograms( *summary, *digis );
+	  } else {
+	    SiStripReadoutKey::ReadoutPath path = SiStripReadoutKey::path( fec_key );
+	    stringstream ss;
+	    ss << "[CommissioningSourceMtcc::analyze]"
+	       << " Commissioning task with FED key " 
+	       << hex << setfill('0') << setw(8) << fed_key << dec
+	       << " and FED id/ch " 
+	       << path.fedId_ << "/"
+	       << path.fedCh_ 
+	       << " not found in list!"; 
+	    edm::LogError("Commissioning") << ss.str();
+	  }
 	}
       }
     }
@@ -287,10 +266,6 @@ void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
     return; 
   }
 
-  // Check if commissioning task is FED cabling 
-  //if ( task_ == "FED_CABLING" || ( task_ == "UNDEFINED" && task == SiStripEventSummary::FED_CABLING ) ) { cablingTask_ = true; }
-  //else { cablingTask_ = false; }
-
   // Iterate through FEC cabling and create commissioning task objects
   for ( vector<SiStripFec>::const_iterator ifec = fecCabling_->fecs().begin(); ifec != fecCabling_->fecs().end(); ifec++ ) {
     for ( vector<SiStripRing>::const_iterator iring = (*ifec).rings().begin(); iring != (*ifec).rings().end(); iring++ ) {
@@ -308,27 +283,23 @@ void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
 	    // Retrieve FED channel connection object in order to create key for task map
 	    FedChannelConnection conn = fedCabling_->connection( iconn->second.first,
 								 iconn->second.second );
-	    uint32_t fed_key = SiStripGenerateKey::fedKey( conn.fedId(), conn.fedCh() );
-	    /*uint32_t fec_key = SiStripGenerateKey::controlKey( conn.fecCrate(),
-							       conn.fecSlot(),
-							       conn.fecRing(),
-							       conn.ccuAddr(),
-							       conn.ccuChan(),
-							       conn.lldChannel() );*/
-	    uint32_t key = fed_key;//cablingTask_ ? fec_key : fed_key;
+	    uint32_t fed_key = SiStripReadoutKey::key( conn.fedId(), conn.fedCh() );
+
+	    uint32_t key = fed_key;//cablingTask_ ? fec_key : fed_key;	    
 	    // Create commissioning task objects
 	    if ( tasks_.find( key ) == tasks_.end() ) {
 	      
+	      //Giulio
 	      if      ( task_ == "PEDESTALS" )   { tasks_[key] = new PedestalsTaskMtcc( dqm_, conn, 
-									cutForNoisy_, 
-									cutForDead_, 
-									cutForNonGausTails_  ); }
+											cutForNoisy_, 
+											cutForDead_, 
+											cutForNonGausTails_  ); }
 	      else if ( task_ == "UNDEFINED" )   {
 		//  Use data stream to determine which task objects are created!
 		if ( task == SiStripEventSummary::PEDESTALS )    { tasks_[key] = new PedestalsTaskMtcc( dqm_, conn,
-											cutForNoisy_, 
-											cutForDead_, 
-											cutForNonGausTails_ ); }
+													cutForNoisy_, 
+													cutForDead_, 
+													cutForNonGausTails_ ); }
 		else if ( task == SiStripEventSummary::UNKNOWN_TASK ) {
 		  edm::LogError("Commissioning") << "[CommissioningSourceMtcc::createTask]"
 						 << " Unknown commissioning task in data stream! " << task_;
@@ -337,7 +308,7 @@ void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
 		edm::LogError("Commissioning") << "[CommissioningSourceMtcc::createTask]"
 					       << " Unknown commissioning task in .cfg file! " << task_;
 	      }
-
+	      
 	      // Check if key is found and, if so, book histos and set update freq
 	      if ( tasks_.find( key ) != tasks_.end() ) {
 // 		stringstream ss;
@@ -350,10 +321,7 @@ void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
 // 		   << " in directory " << dir; 
 // 		edm::LogInfo("Commissioning") << ss.str();
 		tasks_[key]->bookHistograms(); 
-		tasks_[key]->updateFreq( updateFreq_ );
-		//tasks_[key]->cutForDead( cutForDead_ );
-		//tasks_[key]->cutForNoisy( cutForNoisy_ );
-		//tasks_[key]->cutForNonGausTails( cutForNonGausTails_ ); 
+		tasks_[key]->updateFreq( updateFreq_ ); 
 	      } else {
 		stringstream ss;
 		ss << "[CommissioningSourceMtcc::createTask]"
@@ -397,7 +365,7 @@ void CommissioningSourceMtcc::writePed(){
     uint32_t detid= fedCabling_->connection((*ipair).first,(*ipair).second).detId();
     uint16_t apv= fedCabling_->connection((*ipair).first,(*ipair).second).apvPairNumber();
     uint16_t nApv= fedCabling_->connection((*ipair).first,(*ipair).second).nApvPairs();
-    uint32_t fed_key = SiStripGenerateKey::fedKey((*ipair).first,(*ipair).second);
+    uint32_t fed_key = SiStripReadoutKey::key((*ipair).first,(*ipair).second);
     if(apv==0) { 
       theSiStripVector_p.clear();
       theSiStripVector_n.clear();
@@ -409,14 +377,14 @@ void CommissioningSourceMtcc::writePed(){
       float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);
       int flag;					//giulio
       if (thisnoise == 0){flag = 1;}           //giulio
-        else {flag = 0;}                       //giulio
+      else {flag = 0;}                       //giulio
       cout << " ped and noise for " << il << " are " << thisped << " and " << thisnoise << endl;
       sistripdata_p.Data = ped->EncodeStripData(
 						thisped,
 						thisnoise,
 						2,
 						5,
-						0
+						flag
 						);
       theSiStripVector_p.push_back(sistripdata_p);	
       SiStripNoises::SiStripData sistripdata_n;
@@ -535,7 +503,7 @@ vector < pair<uint16_t, uint16_t> >  CommissioningSourceMtcc::OrderedPairs(const
   for ( ifed = fedCabling_->feds().begin(); ifed != fedCabling_->feds().end(); ifed++ ) {
     for ( uint16_t ichan = 0; ichan < 96; ichan++ ) {
       // Create FED key and check if non-zero
-      uint32_t fed_key = SiStripGenerateKey::fedKey( *ifed, ichan );
+      uint32_t fed_key = SiStripReadoutKey::key( *ifed, ichan );
       cout << " fed key   " << fed_key << endl;
       if ( fed_key ) { 
 	uint32_t detid = fedCabling_->connection(*ifed, ichan).detId(); 
@@ -544,10 +512,7 @@ vector < pair<uint16_t, uint16_t> >  CommissioningSourceMtcc::OrderedPairs(const
 	uint16_t ich=ichan;
 
 	if (detid!=0)     chanfedpairs.push_back(make_pair(ifl,ich));
-	
-
       }
-      
     }
   }
   stable_sort( chanfedpairs.begin(),chanfedpairs.end(),OrderChannels(setup));

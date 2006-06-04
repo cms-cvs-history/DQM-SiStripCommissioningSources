@@ -1,6 +1,7 @@
 #include "DQM/SiStripCommissioningSources/test/stubs/CommissioningTaskMtcc.h"
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "DataFormats/SiStripDetId/interface/SiStripControlKey.h"
 
 #include <iostream>
 #include <string> 
@@ -26,14 +27,14 @@ CommissioningTaskMtcc::CommissioningTaskMtcc( DaqMonitorBEInterface* dqm,
 			    << " Constructing object for FED id/ch " 
 			    << connection_.fedId() << "/" 
 			    << connection_.fedCh();
-  fedKey_ = SiStripGenerateKey::fedKey( connection_.fedId(), 
-					connection_.fedCh() );
-  fecKey_ = SiStripGenerateKey::controlKey( connection_.fecCrate(),
-					    connection_.fecSlot(),
-					    connection_.fecRing(),
-					    connection_.ccuAddr(),
-					    connection_.ccuChan(),
-					    connection_.lldChannel() );
+  fedKey_ = SiStripReadoutKey::key( connection_.fedId(), 
+				    connection_.fedCh() );
+  fecKey_ = SiStripControlKey::key( connection_.fecCrate(),
+				    connection_.fecSlot(),
+				    connection_.fecRing(),
+				    connection_.ccuAddr(),
+				    connection_.ccuChan(),
+				    connection_.lldChannel() );
 }
 
 // -----------------------------------------------------------------------------

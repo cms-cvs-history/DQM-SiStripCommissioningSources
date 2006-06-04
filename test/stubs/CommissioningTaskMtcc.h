@@ -6,8 +6,7 @@
 #include "DataFormats/SiStripDigi/interface/SiStripRawDigi.h"
 #include "DataFormats/SiStripDigi/interface/SiStripEventSummary.h"
 #include "CondFormats/SiStripObjects/interface/FedChannelConnection.h"
-#include "DQM/SiStripCommon/interface/SiStripGenerateKey.h"
-//#include "DQM/SiStripCommissioningSourcesMtcc/interface/CommissioningSourceMtcc.h"
+#include "DataFormats/SiStripDetId/interface/SiStripReadoutKey.h"
 #include "boost/cstdint.hpp"
 #include <string>
 #include <iomanip>
@@ -137,7 +136,11 @@ const FedChannelConnection& CommissioningTaskMtcc::connection() const { return c
 const uint32_t& CommissioningTaskMtcc::fecKey() const { return fecKey_; }
 const uint32_t& CommissioningTaskMtcc::fedKey() const { return fedKey_; }
 
-void CommissioningTaskMtcc::fedChannel( const uint32_t& fed_key ) { fedChannel_ = SiStripGenerateKey::fedChannel( fed_key ); }
+void CommissioningTaskMtcc::fedChannel( const uint32_t& fed_key ) { 
+  SiStripReadoutKey::ReadoutPath path = SiStripReadoutKey::path( fed_key ); 
+  fedChannel_.first  = path.fedId_; 
+  fedChannel_.second = path.fedCh_;
+}
 const uint32_t& CommissioningTaskMtcc::fedId() const { return fedChannel_.first; }
 const uint32_t& CommissioningTaskMtcc::fedCh() const { return fedChannel_.second; }
 

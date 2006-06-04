@@ -25,7 +25,6 @@ class DaqMonitorBEInterface;
 class CommissioningTaskMtcc;
 class FedChannelConnection;
 
-using namespace std;
 
 /**
    @class CommissioningSource
@@ -68,14 +67,12 @@ class CommissioningSourceMtcc : public edm::EDAnalyzer {
   void beginJob( edm::EventSetup const& );
   void analyze( const edm::Event&, const edm::EventSetup& );
   void endJob();
- 
- //protected:
-  CommissioningSourceMtcc(){;};
+
  
  private: // ----- private methods -----
 
   /** Private default constructor. */
-  //CommissioningSourceMtcc();
+  CommissioningSourceMtcc();
   vector < pair<uint16_t, uint16_t> > OrderedPairs(const edm::EventSetup& setup);
   void createDirs();
   void createTask( SiStripEventSummary::Task task );
@@ -102,8 +99,6 @@ class CommissioningSourceMtcc : public edm::EDAnalyzer {
   /** */
   SiStripFecCabling* fecCabling_;
   /** */
-  //bool cablingTask_;
-
 
   cond::ServiceLoader* loader;
   cond::DBSession* session;

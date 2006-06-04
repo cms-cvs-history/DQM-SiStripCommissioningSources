@@ -1,6 +1,5 @@
 #include "DQM/SiStripCommissioningSources/test/stubs/PedestalsTaskMtcc.h"
 #include "DQM/SiStripCommissioningSources/test/stubs/SiStripHistoNamingSchemeMtcc.h"
-#include "DQM/SiStripCommon/interface/SiStripGenerateKey.h"
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
 #include "CalibFormats/SiStripObjects/interface/SiStripFecCabling.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -239,6 +238,7 @@ void PedestalsTaskMtcc::update() {
 							  peds_.vSumOfCMSContents_[ibin]/(entries - getUpdateFreq())
 							  ) // the first updateFreq_ events are not user for this calulation 
 							 );
+	   //std::cout << "sono qui " <<  peds_.meCommonModeSubtractedNoise_->getBinContent( ibin+1);
         }
 	else peds_.meCommonModeSubtractedNoise_->setBinContent( ibin+1, 0);
       }
