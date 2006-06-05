@@ -451,9 +451,9 @@ void CommissioningSourceMtcc::writePed(){
     //      count++; 
     //      int iiov = (count!=iov_ped.size()) ? iter->first : edm::IOVSyncValue::endOfTime().eventID().run();   //set last iov valid forever
     int iiov;    
-    if (RunStart_>0)
-      iiov = RunStart_;
-    else
+    //if (RunStart_>0)
+    //  iiov = RunStart_;
+    //else
       iiov = edm::IOVSyncValue::endOfTime().eventID().run();   //set last iov valid forever
     
     cout << "Associate IOV... " << iiov << endl;
