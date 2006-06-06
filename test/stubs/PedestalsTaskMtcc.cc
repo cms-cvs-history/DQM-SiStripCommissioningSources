@@ -158,9 +158,9 @@ void PedestalsTaskMtcc::fill( const SiStripEventSummary& summary,
     // Fill vectors
     for ( uint16_t ibin = 0; ibin < nbins; ibin++ ) {
      if  ( (abs(digis.data[ibin].adc()-peds_.mePedestals_->getBinContent(ibin+1))
-          < CUTAVOIDSIGNAL * peds_.meRawNoise_->getBinContent(ibin+1) )  // avoid possible clusters
-	&&
-	(theBadStripFinder_.downloadFlag(ibin) == 0) ){       
+          < CUTAVOIDSIGNAL * peds_.meRawNoise_->getBinContent(ibin+1) )){  // avoid possible clusters
+	//&&
+	//(theBadStripFinder_.downloadFlag(ibin) == 0) ){       
        //if (theBadStripFinder_.downloadFlag(ibin) == 0){     //check if it is a good strip
          peds_.vSumOfSquares_[ibin] += digis.data[ibin].adc() * digis.data[ibin].adc();
          peds_.vSumOfContents_[ibin] += digis.data[ibin].adc();
@@ -230,7 +230,7 @@ void PedestalsTaskMtcc::update() {
       if (tot_event_ > getUpdateFreq()){ // if not in the first iteration fills common mode subtracted histos
   
 	//theBadStripFinder_.check(ibin);  
-        if (theBadStripFinder_.downloadFlag(ibin) == 0){ 
+        //if (theBadStripFinder_.downloadFlag(ibin) == 0){ 
            peds_.meCommonModeSubtractedNoise_->setBinContent( ibin+1, sqrt(
 							  peds_.vSumOfCMSSquares_[ibin]/(entries - getUpdateFreq())
 							   -
@@ -239,8 +239,8 @@ void PedestalsTaskMtcc::update() {
 							  ) // the first updateFreq_ events are not user for this calulation 
 							 );
 	   //std::cout << "sono qui " <<  peds_.meCommonModeSubtractedNoise_->getBinContent( ibin+1);
-        }
-	else peds_.meCommonModeSubtractedNoise_->setBinContent( ibin+1, 0);
+        //}
+	//else peds_.meCommonModeSubtractedNoise_->setBinContent( ibin+1, 0);
       }
     } else {
       //      cout << "trovato un canale con 0 entries " << ibin <<" " << entries<<  endl;
