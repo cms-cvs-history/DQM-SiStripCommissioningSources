@@ -375,10 +375,11 @@ void CommissioningSourceMtcc::writePed(){
       PedestalsTaskMtcc* pedestals_ = dynamic_cast<PedestalsTaskMtcc*>(tasks_[fed_key]);
       float thisped = pedestals_->getPedestals()->getBinContent(il+1);
       float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);
-      int flag;					//giulio
-      if (thisnoise == 0){flag = 1;}           //giulio
-      else {flag = 0;}                       //giulio
-      cout << " ped and noise for " << il << " are " << thisped << " and " << thisnoise << endl;
+      int flag = 0;					//giulio
+      if (pedestals_->getFlag(il) != 0){flag = 1;}           //giulio
+      //else {flag = 0;}                       //giulio
+      if (flag == 1){
+         cout << " ped and noise for " << il << " are " << thisped << " and " << thisnoise << " Flag " << flag <<endl;}
       sistripdata_p.Data = ped->EncodeStripData(
 						thisped,
 						thisnoise,
