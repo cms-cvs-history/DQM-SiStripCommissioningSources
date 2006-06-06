@@ -20,6 +20,7 @@ class PedestalsTaskMtcc : public CommissioningTaskMtcc {
   float getCutForNoisy(){ return cutForNoisy_; };
   float getCutForDead(){ return cutForDead_; };
   float getCutForNonGausTails(){ return cutForNonGausTails_; };
+  int getFlag(uint16_t strip){ return theBadStripFinder_.downloadFlag(strip); };
 
  private:
   
