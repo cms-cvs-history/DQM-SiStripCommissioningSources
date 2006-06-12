@@ -21,8 +21,8 @@ class StripMask {
 	private:
 	vector<int> vFlag_;
 	uint32_t totalEvent_;
-	float meanNoise_;
-	float meanNumberOfGoodEvents_;
+	float meanNoise_[2];
+	float meanNumberOfGoodEvents_[2];
         //StripMask* theStripMask_;
 	float cutNoisy_;
 	float cutDead_;
