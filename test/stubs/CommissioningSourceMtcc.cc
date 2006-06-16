@@ -84,7 +84,6 @@ void CommissioningSourceMtcc::beginJob( const edm::EventSetup& setup ) {
   setup.get<SiStripFedCablingRcd>().get( fed_cabling ); 
   fedCabling_ = const_cast<SiStripFedCabling*>( fed_cabling.product() ); 
   fecCabling_ = new SiStripFecCabling( *fed_cabling );
-  rightpairs=OrderedPairs(setup);
 
   // Create root directories according to control logical structure
   createDirs();
@@ -135,11 +134,15 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   
   if ( summary->fedReadoutMode() == SiStripEventSummary::VIRGIN_RAW ) {
     event.getByLabel( inputModuleLabel_, "VirginRaw", raw );
+    //std::cout << " sono in virgin" << std::endl;
   } else if ( summary->fedReadoutMode() == SiStripEventSummary::PROC_RAW ) {
     event.getByLabel( inputModuleLabel_, "ProcRaw", raw );
+    //std::cout << " sono in processed" << std::endl; 
  } else if ( summary->fedReadoutMode() == SiStripEventSummary::SCOPE_MODE ) {
     event.getByLabel( inputModuleLabel_, "ScopeMode", raw );
+    //std::cout << " sono in scope" << std::endl;
   } else if ( summary->fedReadoutMode() == SiStripEventSummary::ZERO_SUPPR ) {
+    //event.getByLabel( inputModuleLabel_, "ZeroSuppr", zs );
   } else {
     edm::LogError("CommissioningSourceMtcc") << "[CommissioningSourceMtcc::analyze]"
 					 << " Unknown FED readout mode!";
@@ -251,7 +254,7 @@ void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
 	  dqm_->setCurrentFolder( dir );
 	  map< uint16_t, pair<uint16_t,uint16_t> >::const_iterator iconn;
 	  for ( iconn = imodule->fedChannels().begin(); iconn != imodule->fedChannels().end(); iconn++ ) {
-	    if ( !(iconn->second.first) ) { continue; } 
+	    if ( !(iconn->second.first) ) { continue; }
 	    // Retrieve FED channel connection object in order to create key for task map
 	    FedChannelConnection conn = fedCabling_->connection( iconn->second.first,
 								 iconn->second.second );
@@ -323,44 +326,72 @@ void CommissioningSourceMtcc::writePed(){
   SiStripPedestalsVector theSiStripVector_p;
   SiStripNoiseVector theSiStripVector_n;
 
-  vector< pair<uint16_t,uint16_t> >::iterator ipair;
-  for (ipair=rightpairs.begin();ipair!=rightpairs.end();ipair++){
-    uint32_t detid= fedCabling_->connection((*ipair).first,(*ipair).second).detId();
-    uint16_t apv= fedCabling_->connection((*ipair).first,(*ipair).second).apvPairNumber();
-    uint16_t nApv= fedCabling_->connection((*ipair).first,(*ipair).second).nApvPairs();
-    uint32_t fed_key = SiStripReadoutKey::key((*ipair).first,(*ipair).second);
-    if(apv==0) { 
-      theSiStripVector_p.clear();
-      theSiStripVector_n.clear();
-    }
-    for (unsigned int il=0;il<256;il++){
-      SiStripPedestals::SiStripData sistripdata_p;
-      PedestalsTaskMtcc* pedestals_ = dynamic_cast<PedestalsTaskMtcc*>(tasks_[fed_key]);
-      float thisped = pedestals_->getPedestals()->getBinContent(il+1);
-      float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);
-      int flag = 0;					
-      if (pedestals_->getFlag(il) != 0){flag = 1;}           
-      if (flag == 1){
-         cout << " ped and noise for " << il << " are " << thisped << " and " << thisnoise << " Flag " << flag <<endl;}
-      sistripdata_p.Data = ped->EncodeStripData(
-						thisped,
-						thisnoise,
-						2,
-						5,
-						flag
-						);
-      theSiStripVector_p.push_back(sistripdata_p);	
-      SiStripNoises::SiStripData sistripdata_n;
-      sistripdata_n.setData(thisnoise, flag); 
-      theSiStripVector_n.push_back(sistripdata_n);	
-    }
-    if (apv==nApv-1)  {
-      ped->m_pedestals.insert(std::pair<uint32_t, SiStripPedestalsVector > (detid,theSiStripVector_p));
-      noise->m_noises.insert(std::pair<uint32_t, SiStripNoiseVector > (detid,theSiStripVector_n));
-    }
+  for ( vector<SiStripFec>::const_iterator ifec = fecCabling_->fecs().begin(); ifec != fecCabling_->fecs().end(); ifec++ ) {
+    for ( vector<SiStripRing>::const_iterator iring = (*ifec).rings().begin(); iring != (*ifec).rings().end(); iring++ ) {
+      for ( vector<SiStripCcu>::const_iterator iccu = (*iring).ccus().begin(); iccu != (*iring).ccus().end(); iccu++ ) {
+        for ( vector<SiStripModule>::const_iterator imodule = (*iccu).modules().begin(); imodule != (*iccu).modules().end(); imodule++ ){
+          map< uint16_t, pair<uint16_t,uint16_t> > fedConMap = imodule->fedChannels();
+    	  uint32_t detid= imodule->detId();
+          uint16_t nApv= imodule->nApvPairs();
+          for (uint16_t ipair = 0; ipair < nApv; ipair++){
+             if(ipair==0) { 
+              theSiStripVector_p.clear();
+              theSiStripVector_n.clear();
+             }
+             map< uint16_t, pair<uint16_t,uint16_t> >::iterator iterFedCon = fedConMap.find(imodule->lldChannel(ipair));
+             if (iterFedCon!=fedConMap.end()){
+               for (unsigned int il=0;il<256;il++){
+                 uint32_t fed_key = SiStripReadoutKey::key(iterFedCon->second.first,iterFedCon->second.second); 
+                 SiStripPedestals::SiStripData sistripdata_p;
+                 PedestalsTaskMtcc* pedestals_ = dynamic_cast<PedestalsTaskMtcc*>(tasks_[fed_key]);
+                 float thisped = pedestals_->getPedestals()->getBinContent(il+1);
+                 float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);
+                 int flag = 0;					
+                 if (pedestals_->getFlag(il) != 0){flag = 1;}           
+                 if (flag == 1){
+                   cout << " ped and noise for " << il << " are " << thisped << " and " << thisnoise << " Flag " << flag <<endl;}
+                 sistripdata_p.Data = ped->EncodeStripData(
+						      thisped,
+						      thisnoise,
+						      2,
+						      5,
+						      flag
+						      );
+                 theSiStripVector_p.push_back(sistripdata_p);	
+                 SiStripNoises::SiStripData sistripdata_n;
+                 sistripdata_n.setData(thisnoise, flag); 
+                 theSiStripVector_n.push_back(sistripdata_n);	
+               }
+             } else {
+                 edm::LogInfo("Commissioning") << "Warning!! Found " << imodule->fedChannels().size()  
+                                               << " fibers instead of " << nApv  
+					       << " on module with id " << detid	
+					       << "    Missing Apv Pair " << ipair ;
+                 for (unsigned int il=0;il<256;il++){
+                   SiStripPedestals::SiStripData sistripdata_p;
+		   sistripdata_p.Data = ped->EncodeStripData(
+                                                      0,
+                                                      0,
+                                                      2,
+                                                      5,
+                                                      1
+                                                      );
+                   theSiStripVector_p.push_back(sistripdata_p);
+                   SiStripNoises::SiStripData sistripdata_n;
+                   sistripdata_n.setData(0, 1);
+                   theSiStripVector_n.push_back(sistripdata_n);
+                 }
+             }
+             if (ipair==nApv-1)  {
+               ped->m_pedestals.insert(std::pair<uint32_t, SiStripPedestalsVector > (detid,theSiStripVector_p));
+               noise->m_noises.insert(std::pair<uint32_t, SiStripNoiseVector > (detid,theSiStripVector_n));
+             }
+	  }	
+  //}
+        }
+      }     
+    } 
   }
-  
-  
   
   
   cout<<"Now writing to DB"<<endl;
@@ -458,26 +489,3 @@ void CommissioningSourceMtcc::writePed(){
   delete loader;
 }
 
-vector < pair<uint16_t, uint16_t> >  CommissioningSourceMtcc::OrderedPairs(const edm::EventSetup& setup){
-
-
-  vector< pair<uint16_t,uint16_t> >chanfedpairs;
-  vector<uint16_t>::const_iterator ifed;
-  for ( ifed = fedCabling_->feds().begin(); ifed != fedCabling_->feds().end(); ifed++ ) {
-    for ( uint16_t ichan = 0; ichan < 96; ichan++ ) {
-      // Create FED key and check if non-zero
-      uint32_t fed_key = SiStripReadoutKey::key( *ifed, ichan );
-      cout << " fed key   " << fed_key << endl;
-      if ( fed_key ) { 
-	uint32_t detid = fedCabling_->connection(*ifed, ichan).detId(); 
-	uint16_t ifl=  *ifed;
-	uint16_t ich=ichan;
-
-	if (detid!=0)     chanfedpairs.push_back(make_pair(ifl,ich));
-      }
-    }
-  }
-  stable_sort( chanfedpairs.begin(),chanfedpairs.end(),OrderChannels(setup));
-
-  return chanfedpairs;
-}

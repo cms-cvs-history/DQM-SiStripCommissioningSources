@@ -29,31 +29,6 @@ class FedChannelConnection;
 /**
    @class CommissioningSource
 */
-class OrderChannels {
- public:
-  OrderChannels( const edm::EventSetup& setup){    
-    //   setup.get<SiStripFedCablingRcd>().get( fedCabling_ ); 
-    edm::ESHandle<SiStripFedCabling> fed_cabling;
-    setup.get<SiStripFedCablingRcd>().get( fed_cabling ); 
-    fedCabling_ = const_cast<SiStripFedCabling*>( fed_cabling.product() ); 
-  };
-  bool operator()( pair<uint16_t, uint16_t> h1,
-		   pair<uint16_t, uint16_t> h2)
-    {      
-      uint32_t detid1 = fedCabling_->connection(h1.first, h1.second).detId(); 
-      uint16_t apv1 = fedCabling_->connection(h1.first, h1.second).apvPairNumber();
-      uint32_t detid2 = fedCabling_->connection(h2.first, h2.second).detId(); 
-      uint16_t apv2 = fedCabling_->connection(h2.first, h2.second).apvPairNumber();
-     
-      if(detid1==detid2){
-	return apv1<apv2;
-      }else{
-	return detid1 < detid2;}
-    }
- private:
-  SiStripFedCabling* fedCabling_;
-};
-
 class CommissioningSourceMtcc : public edm::EDAnalyzer {
 
  public: // ----- public interface -----
@@ -73,7 +48,6 @@ class CommissioningSourceMtcc : public edm::EDAnalyzer {
 
   /** Private default constructor. */
   CommissioningSourceMtcc();
-  vector < pair<uint16_t, uint16_t> > OrderedPairs(const edm::EventSetup& setup);
   void createDirs();
   void createTask( SiStripEventSummary::Task task );
   void writePed();
