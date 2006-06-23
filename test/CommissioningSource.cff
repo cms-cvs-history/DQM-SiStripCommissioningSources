@@ -1,0 +1,22 @@
+include "DQM/SiStripCommon/data/MessageLogger.cfi"
+
+include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
+
+include "DQM/SiStripCommon/data/MonitorDaemon.cfi"
+replace MonitorDaemon.DestinationAddress = "lxcmse1.cern.ch"
+replace MonitorDaemon.SendPort = 9090
+replace MonitorDaemon.UpdateDelay = 1000
+
+include "OnlineDB/SiStripESSources/data/BuildFedCablingUsingXmlFiles.cfi"
+replace BuildFedCablingUsingXmlFiles.InputModuleXml = "/afs/cern.ch/cms/cmt/onlinedev/data/petal11.xml"
+
+include "IORawData/SiStripInputSources/data/TBRUInputSource.cfi"
+replace TBRUInputSource.fileNames = { "file:/afs/cern.ch/cms/cmt/onlinedev/data/RU0030349_000.root" }
+
+include "EventFilter/SiStripRawToDigi/data/RawToDigi.cfi"
+replace RawToDigi.UseFedKey = true
+
+include "DQM/SiStripCommissioningSources/data/CommissioningSource.cfi"
+
+include "DQM/SiStripCommon/data/OutputService.cfi"
+

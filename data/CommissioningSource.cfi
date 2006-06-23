@@ -1,0 +1,15 @@
+module CommissioningSource = SiStripCommissioningSource
+{
+	          string InputModuleLabel  = "RawToDigi"
+	untracked  int32 HistoUpdateFreq   = 100
+	untracked string RootFileName      = "Source"
+	untracked string CommissioningTask = "UNDEFINED"
+}
+
+// string InputModuleLabel: 		[no default]		label of the module producing the Digis
+// untracked int32 HistoUpdateFreq:	[default=100] 		event freq with which (DQM) histos are updated
+// untracked string RootFileName:	[default="Source"]	output root filename for source histograms
+// untracked string CommissioningTask:	[default=UNDEFINED]	overrides commissioning task inferred from data stream
+
+
+
