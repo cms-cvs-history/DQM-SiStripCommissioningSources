@@ -7,6 +7,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
 // dqm
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
 #include "DQM/SiStripCommissioningSources/test/stubs/SiStripHistoNamingSchemeMtcc.h"
@@ -47,15 +48,8 @@ CommissioningSourceMtcc::CommissioningSourceMtcc( const edm::ParameterSet& pset 
   firstEvent_(true),
   fecCabling_(0),
   //cablingTask_(false),
-  connect_(pset.getUntrackedParameter<std::string>("connect","sqlite_file:./sistrippedestals.db")), 
-  catalog_(pset.getUntrackedParameter<std::string>("catalog","")), 
-  tag_p(pset.getUntrackedParameter<std::string>("tag_p","SiStripPedestals_v1")), 
-  tag_n(pset.getUntrackedParameter<std::string>("tag_n","SiStripNoises_v1")), 
-  message_level_(pset.getUntrackedParameter<unsigned int>("messagelevel",0)),
-  auth_(pset.getUntrackedParameter<unsigned int>("authenticationMethod",0)),
   userEnv_("CORAL_AUTH_USER=" + pset.getUntrackedParameter<string>("userEnv","me")),
   passwdEnv_("CORAL_AUTH_PASSWORD="+ pset.getUntrackedParameter<string>("passwdEnv","mypass")),
-  RunStart_(pset.getUntrackedParameter<int>("RunStart",10)),
   
   cutForNoisy_(pset.getParameter<double>("cutForNoisy")),
   cutForDead_(pset.getParameter<double>("cutForDead")),
@@ -321,10 +315,10 @@ void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
 void CommissioningSourceMtcc::writePed(){
  
   SiStripPedestals * ped = new SiStripPedestals();
-  SiStripNoises * noise = new SiStripNoises();
+  SiStripNoises    * noise = new SiStripNoises();
   
-  SiStripPedestalsVector theSiStripVector_p;
-  SiStripNoiseVector theSiStripVector_n;
+  std::vector<char>  theSiStripVector_p;  
+  std::vector<short> theSiStripVector_n;  
 
   for ( vector<SiStripFec>::const_iterator ifec = fecCabling_->fecs().begin(); ifec != fecCabling_->fecs().end(); ifec++ ) {
     for ( vector<SiStripRing>::const_iterator iring = (*ifec).rings().begin(); iring != (*ifec).rings().end(); iring++ ) {
@@ -342,150 +336,61 @@ void CommissioningSourceMtcc::writePed(){
              if (iterFedCon!=fedConMap.end()){
                for (unsigned int il=0;il<256;il++){
                  uint32_t fed_key = SiStripReadoutKey::key(iterFedCon->second.first,iterFedCon->second.second); 
-                 SiStripPedestals::SiStripData sistripdata_p;
                  PedestalsTaskMtcc* pedestals_ = dynamic_cast<PedestalsTaskMtcc*>(tasks_[fed_key]);
                  float thisped = pedestals_->getPedestals()->getBinContent(il+1);
                  float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);
                  int flag = 0;					
                  if (pedestals_->getFlag(il) != 0){flag = 1;}           
                  if (flag == 1){
-                   cout << " ped and noise for " << il << " are " << thisped << " and " << thisnoise << " Flag " << flag <<endl;}
-                 sistripdata_p.Data = ped->EncodeStripData(
-						      thisped,
-						      thisnoise,
-						      2,
-						      5,
-						      flag
-						      );
-                 theSiStripVector_p.push_back(sistripdata_p);	
-                 SiStripNoises::SiStripData sistripdata_n;
-                 sistripdata_n.setData(thisnoise, flag); 
-                 theSiStripVector_n.push_back(sistripdata_n);	
+                   cout << " ped and noise for " << il << " are " << thisped << " and " << thisnoise << " Flag " << flag <<endl;
+		 }
+		 ped->setData(thisped,2,5,theSiStripVector_p);
+		 noise->setData(thisnoise,flag,theSiStripVector_n);
                }
              } else {
-                 edm::LogInfo("Commissioning") << "Warning!! Found " << imodule->fedChannels().size()  
-                                               << " fibers instead of " << nApv  
-					       << " on module with id " << detid	
-					       << "    Missing Apv Pair " << ipair ;
-                 for (unsigned int il=0;il<256;il++){
-                   SiStripPedestals::SiStripData sistripdata_p;
-		   sistripdata_p.Data = ped->EncodeStripData(
-                                                      0,
-                                                      0,
-                                                      2,
-                                                      5,
-                                                      1
-                                                      );
-                   theSiStripVector_p.push_back(sistripdata_p);
-                   SiStripNoises::SiStripData sistripdata_n;
-                   sistripdata_n.setData(0, 1);
-                   theSiStripVector_n.push_back(sistripdata_n);
-                 }
+	       edm::LogInfo("Commissioning") << "Warning!! Found " << imodule->fedChannels().size()  
+					     << " fibers instead of " << nApv  
+					     << " on module with id " << detid	
+					     << "    Missing Apv Pair " << ipair ;
+	       for (unsigned int il=0;il<256;il++){
+		 ped->setData(0,2,5,theSiStripVector_p);
+		 noise->setData(0,1,theSiStripVector_n);
+	       }
              }
-             if (ipair==nApv-1)  {
-               ped->m_pedestals.insert(std::pair<uint32_t, SiStripPedestalsVector > (detid,theSiStripVector_p));
-               noise->m_noises.insert(std::pair<uint32_t, SiStripNoiseVector > (detid,theSiStripVector_n));
-             }
+	     if (ipair==nApv-1)  {
+	       SiStripPedestals::Range range_p(theSiStripVector_p.begin(),theSiStripVector_p.end());
+	       if ( ! ped->put(detid,range_p) )
+		 edm::LogError("Commissioning")<<"[CommissioningSourceMtcc::writePed] storing pedestals: detid already exists"<<std::endl;
+	       
+	       SiStripNoises::Range range_n(theSiStripVector_n.begin(),theSiStripVector_n.end());
+	       if ( ! noise->put(detid,range_n) )
+		 edm::LogError("Commissioning")<<"[CommissioningSourceMtcc::writePed] storing noise: detid already exists"<<std::endl;
+	     }
 	  }	
-  //}
         }
       }     
     } 
   }
   
-  
+  //End now write sistrippedestals data in DB
   cout<<"Now writing to DB"<<endl;
-  try {
-    loader=new cond::ServiceLoader;  
-    
-    if( auth_==1 ){
-      loader->loadAuthenticationService( cond::XML );
-    }else{
-      loader->loadAuthenticationService( cond::Env );
+  edm::Service<cond::service::PoolDBOutputService> mydbservice;
+  
+  if( mydbservice.isAvailable() ){
+    try{
+      edm::LogInfo("Commissioning")<<"current time "<<mydbservice->currentTime()<<std::endl;
+      edm::LogInfo("Commissioning")<<"end of time "<<mydbservice->currentTime()<<std::endl;
+      mydbservice->newValidityForNewPayload<SiStripPedestals>(ped,mydbservice->endOfTime());
+      mydbservice->newValidityForNewPayload<SiStripNoises>(noise,mydbservice->endOfTime());
+    }catch(const cond::Exception& er){
+      edm::LogError("Commissioning")<<er.what()<<std::endl;
+    }catch(const std::exception& er){
+      edm::LogError("Commissioning")<<"caught std::exception "<<er.what()<<std::endl;
+    }catch(...){
+      edm::LogError("Commissioning")<<"Funny error"<<std::endl;
     }
-    switch (message_level_) {
-    case 0 :
-      loader->loadMessageService(cond::Error);
-      break;    
-    case 1:
-      loader->loadMessageService(cond::Warning);
-      break;
-    case 2:
-      loader->loadMessageService( cond::Info );
-      break;
-    case 3:
-      loader->loadMessageService( cond::Debug );
-      break;  
-    default:
-      loader->loadMessageService();
-    }
-
-    session=new cond::DBSession(connect_);
-    session->setCatalog(catalog_);
-    session->connect(cond::ReadWriteCreate);
-
-    pwriter   =new cond::DBWriter(*session, "SiStripPedestals");
-    nwriter   =new cond::DBWriter(*session, "SiStripNoises");
-    iovwriter =new cond::DBWriter(*session, "IOV");
-    session->startUpdateTransaction();
-
-    cond::IOV* pedIOV= new cond::IOV; 
-    cond::IOV* noiseIOV= new cond::IOV; 
-
-    cout << "markWrite pedestals..." << endl;
-    string pedTok = pwriter->markWrite<SiStripPedestals>(ped); 
-    //      string pedTok = pwriter->markWrite<SiStripPedestals>(iter->second); 
-    cout << pedTok << endl;
-
-    cout << "markWrite noises..." << endl;
-    //      string noiseTok = nwriter->markWrite<SiStripNoises>(iter_n->second);
-    string noiseTok = nwriter->markWrite<SiStripNoises>(noise);
-    //      iter_n++;
-    cout << noiseTok << endl;
-    //      count++; 
-    //      int iiov = (count!=iov_ped.size()) ? iter->first : edm::IOVSyncValue::endOfTime().eventID().run();   //set last iov valid forever
-    int iiov;    
-    //if (RunStart_>0)
-    //  iiov = RunStart_;
-    //else
-      iiov = edm::IOVSyncValue::endOfTime().eventID().run();   //set last iov valid forever
-    
-    cout << "Associate IOV... " << iiov << endl;
-    pedIOV->iov.insert(std::make_pair(iiov, pedTok));
-    noiseIOV->iov.insert(std::make_pair(iiov, noiseTok));
-    //   }    
-    cout << "iov size " << pedIOV->iov.size() << endl;
-    cout << "markWrite IOV..." << endl;
-    string pedIOVTok = iovwriter->markWrite<cond::IOV>(pedIOV); 
-    string noiseIOVTok = iovwriter->markWrite<cond::IOV>(noiseIOV);  
-    cout << "Commit..." << endl;
-    session->commit();//commit all in one
-    cout << "Done." << endl;
-    cout << "pedIOV size " << pedIOV->iov.size() << endl;
-    cout << "noiseIOV size " << noiseIOV->iov.size() << endl;
-
-    session->disconnect();
-    cout << "Add MetaData... " << endl;
-    metadataSvc = new cond::MetaData(connect_,*loader);
-    metadataSvc->connect();
-    metadataSvc->addMapping(tag_p,pedIOVTok);
-    metadataSvc->addMapping(tag_n,noiseIOVTok);
-    metadataSvc->disconnect();
-    cout << "Done." << endl;
-  }catch(const cond::Exception& e){
-    std::cout<<"cond::Exception: " << e.what()<<std::endl;
-  } catch (cms::Exception& e) {
-    cout << "cms::Exception:  " << e.what() << endl;
-  } catch (exception &e) {
-    cout << "std::exception:  " << e.what() << endl;
-  } catch (...) {
-    cout << "Unknown error caught" << endl;
+  }else{
+    edm::LogError("Commissioning")<<"Service is unavailable"<<std::endl;
   }
-
-  delete session;
-  delete pwriter;
-  delete iovwriter;
-  delete metadataSvc;
-  delete loader;
 }
 

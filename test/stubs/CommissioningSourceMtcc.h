@@ -1,13 +1,6 @@
 #ifndef DQM_SiStripCommissioningSourcesMtcc_CommissioningSourceMtcc_H
 #define DQM_SiStripCommissioningSourcesMtcc_CommissioningSourceMtcc_H
-#include "CondCore/DBCommon/interface/DBWriter.h"
-#include "CondCore/DBCommon/interface/DBSession.h"
 #include "CondCore/DBCommon/interface/Exception.h"
-#include "CondCore/DBCommon/interface/ServiceLoader.h"
-#include "CondCore/DBCommon/interface/ConnectMode.h"
-#include "CondCore/DBCommon/interface/MessageLevel.h"
-#include "CondCore/MetaDataService/interface/MetaData.h"
-#include "CondCore/IOVService/interface/IOV.h"
 #include "CondFormats/SiStripObjects/interface/SiStripFedCabling.h"
 #include "CalibFormats/SiStripObjects/interface/SiStripFecCabling.h"
 #include "CondFormats/SiStripObjects/interface/SiStripPedestals.h"
@@ -74,28 +67,9 @@ class CommissioningSourceMtcc : public edm::EDAnalyzer {
   SiStripFecCabling* fecCabling_;
   /** */
 
-  cond::ServiceLoader* loader;
-  cond::DBSession* session;
-  cond::DBWriter* pwriter;
-  cond::DBWriter* nwriter;
-  cond::DBWriter* iovwriter;
-  cond::MetaData* metadataSvc;
-  map<int, SiStripPedestals *> iov_ped;
-  map<int, SiStripNoises *> iov_noise;
-  string connect_;
-  string catalog_;
-  string tag_p;
-  string tag_n;
-  unsigned int message_level_;
-  unsigned int auth_;
   string userEnv_;  
   string passwdEnv_; 
-  int RunMax_;
-  int RunRange_;
-  int RunStart_;
-  int RunStop_;
   
-
   //cuts
   float cutForNoisy_;
   float cutForDead_;
