@@ -10,10 +10,7 @@
 <use name=DataFormats/Common>
 <use name=DataFormats/SiStripDigi>
 <use name=boost>
-  <use name=CondCore/DBCommon>
-  <use name=CondCore/ESSources>
-  <use name=CondCore/IOVService>
-  <use name=CondCore/MetaDataService>
+<use name=CondCore/DBOutputService>
 <library file="stubs/*.cc" name=DQMSiStripCommissioningSourcesMtcc>
 <flags CXXFLAGS="-g">
 <flags SEAL_PLUGIN_NAME="DQMSiStripCommissioningSourcesMtcc">
@@ -33,9 +30,5 @@
    <use name=DataFormats/Common>
    <use name=DataFormats/SiStripDigi>
    <use name=boost>
-  <use name=CondCore/DBCommon>
-  <use name=CondCore/ESSources>
-  <use name=CondCore/IOVService>
-  <use name=CondCore/MetaDataService>
-#  <use name=oracle>
+   <use name=CondCore/DBOutputService>
 </export>
