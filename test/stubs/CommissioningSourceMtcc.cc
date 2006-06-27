@@ -378,10 +378,12 @@ void CommissioningSourceMtcc::writePed(){
   
   if( mydbservice.isAvailable() ){
     try{
+      size_t PedCallbackToken=mydbservice->callbackToken("SiStripPedestals");
+      size_t NoiseCallbackToken=mydbservice->callbackToken("SiStripNoises");
       edm::LogInfo("Commissioning")<<"current time "<<mydbservice->currentTime()<<std::endl;
-      edm::LogInfo("Commissioning")<<"end of time "<<mydbservice->currentTime()<<std::endl;
-      mydbservice->newValidityForNewPayload<SiStripPedestals>(ped,mydbservice->endOfTime());
-      mydbservice->newValidityForNewPayload<SiStripNoises>(noise,mydbservice->endOfTime());
+      edm::LogInfo("Commissioning")<<"end of time "<<mydbservice->endOfTime()<<std::endl;
+      mydbservice->newValidityForNewPayload<SiStripPedestals>(ped,mydbservice->endOfTime(),PedCallbackToken);
+      mydbservice->newValidityForNewPayload<SiStripNoises>(noise,mydbservice->endOfTime(),NoiseCallbackToken);
     }catch(const cond::Exception& er){
       edm::LogError("Commissioning")<<er.what()<<std::endl;
     }catch(const std::exception& er){
