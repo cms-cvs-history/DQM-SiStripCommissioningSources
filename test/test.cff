@@ -1,15 +1,13 @@
-//include "DQM/SiStripCommon/data/Services.cff"
-
 include "DQM/SiStripCommon/data/MessageLogger.cfi"
-#replace MessageLogger.destinations = { "" }
-#replace MessageLogger.debugModules = { "" }
+replace MessageLogger.destinations = { "" }
+replace MessageLogger.debugModules = { "" }
 
 include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
 
-#include "DQM/SiStripCommon/data/MonitorDaemon.cfi"
-#replace MonitorDaemon.DestinationAddress = "lxcmse1.cern.ch"
-#replace MonitorDaemon.SendPort = 9095
-#replace MonitorDaemon.UpdateDelay = 1000
+include "DQM/SiStripCommon/data/MonitorDaemon.cfi"
+replace MonitorDaemon.DestinationAddress = "lxcmse1.cern.ch"
+replace MonitorDaemon.SendPort = 9095
+replace MonitorDaemon.UpdateDelay = 1000
 
 include "OnlineDB/SiStripESSources/data/BuildFedCablingUsingConfigDb.cfi"
 replace BuildFedCablingUsingConfigDb.UsingDb = true
@@ -18,15 +16,17 @@ replace BuildFedCablingUsingConfigDb.Passwd = "LYON"
 replace BuildFedCablingUsingConfigDb.Path = "cmsr"
 replace BuildFedCablingUsingConfigDb.Partition = "TEL2FED"
 
-//include "OnlineDB/SiStripESSources/data/BuildFedCablingUsingXmlFiles.cfi"
-//replace BuildFedCablingUsingXmlFiles.InputModuleXml = "/afs/cern.ch/cms/cmt/onlinedev/data/petal11.xml"
+#include "OnlineDB/SiStripESSources/data/BuildFedCablingUsingXmlFiles.cfi"
+#replace BuildFedCablingUsingXmlFiles.InputModuleXml = "/data/bainbrid/data/modulerob.xml"
 
 include "IORawData/SiStripInputSources/data/TBRUInputSource.cfi"
-replace TBRUInputSource.fileNames = { "file:/data/bainbrid/data/RU0020339_000.root" }
+replace TBRUInputSource.fileNames = { "file:/data/bainbrid/data/RU0020337_000.root" }
 replace TBRUInputSource.maxEvents = 10
+replace TBRUInputSource.TriggerFedId = 53
 
 include "EventFilter/SiStripRawToDigi/data/RawToDigi.cfi"
 replace RawToDigi.UseFedKey = true
+replace RawToDigi.TriggerFedId = 53
 
 include "DQM/SiStripCommissioningSources/data/CommissioningSource.cfi"
 
