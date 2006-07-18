@@ -152,33 +152,16 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   for ( ifed = fedCabling_->feds().begin(); ifed != fedCabling_->feds().end(); ifed++ ) {
     for ( uint16_t ichan = 0; ichan < 96; ichan++ ) {
       // Create FED key and check if non-zero
-      const FedChannelConnection& conn = fedCabling_->connection(*ifed,ichan);
-      std::cout
-	<< "ifed " << *ifed 
-	<< " channel " << ichan
-	<< " dcuid " << conn.dcuId() << std::hex << " " <<  conn.dcuId() << std::dec 
-	<< " detid " << conn.detId() << std::hex << " " <<  conn.detId() << std::dec 
-	<< " napvs " << conn.nApvPairs() 
-	<< std::endl;
-
       uint32_t fed_key = SiStripReadoutKey::key( *ifed, ichan );
-      std::cout << "son 1" << std::endl;
       if ( fed_key ) { 
-      std::cout << "son 2" << std::endl;
 	// Retrieve digis for given FED key and check if found
 	vector< edm::DetSet<SiStripRawDigi> >::const_iterator digis = raw->find( fed_key );
-	std::cout << "son 3" << std::endl;
 	if ( digis != raw->end() ) { 
-	  std::cout << "son 4" << std::endl;
 	  // Fill histograms for given FEC or FED key, depending on commissioning task
 	  if ( tasks_.find(fed_key) != tasks_.end() ) { 
-	    std::cout << "son 5" << std::endl;
 	    tasks_[fed_key]->fillHistograms( *summary, *digis );
-	    std::cout << "son 6" << std::endl;
 	  } else {
-      std::cout << "son 7" << std::endl;
 	    SiStripReadoutKey::ReadoutPath path = SiStripReadoutKey::path( fec_key );
-      std::cout << "son 8" << std::endl;
 	    stringstream ss;
 	    ss << "[CommissioningSourceMtcc::analyze]"
 	       << " Commissioning task with FED key " 
