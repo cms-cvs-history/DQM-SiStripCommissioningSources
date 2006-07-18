@@ -126,16 +126,16 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   //edm::Handle< edm::DetSetVector<SiStripDigi> > zs;
 
   
-  if ( summary->fedReadoutMode() == SiStripEventSummary::VIRGIN_RAW ) {
+  if ( summary->fedReadoutMode() == sistrip::VIRGIN_RAW ) {
     event.getByLabel( inputModuleLabel_, "VirginRaw", raw );
     //std::cout << " sono in virgin" << std::endl;
-  } else if ( summary->fedReadoutMode() == SiStripEventSummary::PROC_RAW ) {
+  } else if ( summary->fedReadoutMode() == sistrip::PROC_RAW ) {
     event.getByLabel( inputModuleLabel_, "ProcRaw", raw );
     //std::cout << " sono in processed" << std::endl; 
- } else if ( summary->fedReadoutMode() == SiStripEventSummary::SCOPE_MODE ) {
+ } else if ( summary->fedReadoutMode() == sistrip::SCOPE_MODE ) {
     event.getByLabel( inputModuleLabel_, "ScopeMode", raw );
     //std::cout << " sono in scope" << std::endl;
-  } else if ( summary->fedReadoutMode() == SiStripEventSummary::ZERO_SUPPR ) {
+  } else if ( summary->fedReadoutMode() == sistrip::ZERO_SUPPR ) {
     //event.getByLabel( inputModuleLabel_, "ZeroSuppr", zs );
   } else {
     edm::LogError("CommissioningSourceMtcc") << "[CommissioningSourceMtcc::analyze]"
@@ -152,16 +152,33 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   for ( ifed = fedCabling_->feds().begin(); ifed != fedCabling_->feds().end(); ifed++ ) {
     for ( uint16_t ichan = 0; ichan < 96; ichan++ ) {
       // Create FED key and check if non-zero
+      const FedChannelConnection& conn = fedCabling_->connection(*ifed,ichan);
+      std::cout
+	<< "ifed " << *ifed 
+	<< " channel " << ichan
+	<< " dcuid " << conn.dcuId() << std::hex << " " <<  conn.dcuId() << std::dec 
+	<< " detid " << conn.detId() << std::hex << " " <<  conn.detId() << std::dec 
+	<< " napvs " << conn.nApvPairs() 
+	<< std::endl;
+
       uint32_t fed_key = SiStripReadoutKey::key( *ifed, ichan );
+      std::cout << "son 1" << std::endl;
       if ( fed_key ) { 
+      std::cout << "son 2" << std::endl;
 	// Retrieve digis for given FED key and check if found
 	vector< edm::DetSet<SiStripRawDigi> >::const_iterator digis = raw->find( fed_key );
+	std::cout << "son 3" << std::endl;
 	if ( digis != raw->end() ) { 
+	  std::cout << "son 4" << std::endl;
 	  // Fill histograms for given FEC or FED key, depending on commissioning task
 	  if ( tasks_.find(fed_key) != tasks_.end() ) { 
+	    std::cout << "son 5" << std::endl;
 	    tasks_[fed_key]->fillHistograms( *summary, *digis );
+	    std::cout << "son 6" << std::endl;
 	  } else {
+      std::cout << "son 7" << std::endl;
 	    SiStripReadoutKey::ReadoutPath path = SiStripReadoutKey::path( fec_key );
+      std::cout << "son 8" << std::endl;
 	    stringstream ss;
 	    ss << "[CommissioningSourceMtcc::analyze]"
 	       << " Commissioning task with FED key " 
@@ -219,7 +236,7 @@ void CommissioningSourceMtcc::createDirs() {
 
 // -----------------------------------------------------------------------------
 //
-void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
+void CommissioningSourceMtcc::createTask( sistrip::Task task ) {
   LogDebug("Commissioning") << "[CommissioningSourceMtcc::createTask]";
   
   // Check DQM service is available
@@ -230,7 +247,7 @@ void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
   }
 
   // Check commissioning task is known
-  if ( task == SiStripEventSummary::UNKNOWN_TASK && task_ == "UNKNOWN" ) {
+  if ( task == sistrip::UNKNOWN_TASK && task_ == "UNKNOWN" ) {
     edm::LogError("Commissioning") << "[CommissioningSourceMtcc::createTask] Unknown commissioning task!"; 
     return; 
   }
@@ -265,11 +282,11 @@ void CommissioningSourceMtcc::createTask( SiStripEventSummary::Task task ) {
 											cutForNonGausTails_  ); }
 	      else if ( task_ == "UNDEFINED" )   {
 		//  Use data stream to determine which task objects are created!
-		if ( task == SiStripEventSummary::PEDESTALS )    { tasks_[key] = new PedestalsTaskMtcc( dqm_, conn,
+		if ( task == sistrip::PEDESTALS )    { tasks_[key] = new PedestalsTaskMtcc( dqm_, conn,
 													cutForNoisy_, 
 													cutForDead_, 
 													cutForNonGausTails_ ); }
-		else if ( task == SiStripEventSummary::UNKNOWN_TASK ) {
+		else if ( task == sistrip::UNKNOWN_TASK ) {
 		  edm::LogError("Commissioning") << "[CommissioningSourceMtcc::createTask]"
 						 << " Unknown commissioning task in data stream! " << task_;
 		}

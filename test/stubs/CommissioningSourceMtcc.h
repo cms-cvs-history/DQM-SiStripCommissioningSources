@@ -6,6 +6,9 @@
 #include "CondFormats/SiStripObjects/interface/SiStripPedestals.h"
 #include "CondFormats/SiStripObjects/interface/SiStripNoises.h"
 #include "DataFormats/SiStripDigi/interface/SiStripEventSummary.h"
+
+#include "DataFormats/SiStripCommon/interface/SiStripEnumeratedTypes.h"
+
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include <string>
 #include <map>
@@ -42,7 +45,7 @@ class CommissioningSourceMtcc : public edm::EDAnalyzer {
   /** Private default constructor. */
   CommissioningSourceMtcc();
   void createDirs();
-  void createTask( SiStripEventSummary::Task task );
+  void createTask( sistrip::Task task );
   void writePed();
  private: // ----- data members -----
   vector < pair<uint16_t, uint16_t> > rightpairs;
