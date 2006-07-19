@@ -1,0 +1,16 @@
+module DqmSource = CommissioningSourceMtcc
+{
+	string InputModuleLabel = "RawToDigi"
+	untracked int32 HistoUpdateFreq = 100
+	untracked string RootFileName = "Source"
+	untracked string CommissioningTask = "PEDESTALS" //@@ not necessary (will over-ride data stream
+
+	untracked string userEnv="me"
+	untracked string passwdEnv="me"
+
+        double cutForNoisy = 1.8                              
+        double cutForDead = 0.6                            
+        double cutForNonGausTails = 0.95 
+}
+
+
