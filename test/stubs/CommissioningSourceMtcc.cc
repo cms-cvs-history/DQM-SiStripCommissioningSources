@@ -143,6 +143,13 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   }
   
 
+  if ( &(*raw) == 0 ) {
+    edm::LogError("SiStripCommissioningSource")
+      << "[SiStripCommissioningSource::analyze]"
+      << " NULL pointer to DetSetVector!";
+    return;
+  }
+
   //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
   // Generate FEC key (if FED cabling task)
   uint32_t fec_key = 0;
