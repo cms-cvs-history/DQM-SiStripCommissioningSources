@@ -1,4 +1,4 @@
-module DqmSource = CommissioningSourceMtcc
+module PedestalCalculator = CommissioningSourceMtcc
 {
 	string InputModuleLabel = "RawToDigi"
 	untracked int32 HistoUpdateFreq = 100

@@ -140,6 +140,12 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   } else {
     edm::LogError("CommissioningSourceMtcc") << "[CommissioningSourceMtcc::analyze]"
 					 << " Unknown FED readout mode!";
+
+    //%%%%%%%%%%%% REMOVE %%%%%%%%%%
+    edm::LogError("CommissioningSourceMtcc") << "[CommissioningSourceMtcc::analyze]"
+					 << "Force to take virgin mode"; 
+    event.getByLabel( inputModuleLabel_, "VirginRaw", raw );
+    //%%%%%%%%%%%% REMOVE %%%%%%%%%%
   }
   
 
@@ -339,6 +345,7 @@ void CommissioningSourceMtcc::writePed(){
               theSiStripVector_p.clear();
               theSiStripVector_n.clear();
              }
+	     edm::LogInfo("Commissioning")<<"[CommissioningSourceMtcc::writePed] detid " << detid << " napvpairs " << nApv << " ipair " << ipair << std::endl;
              map< uint16_t, pair<uint16_t,uint16_t> >::iterator iterFedCon = fedConMap.find(imodule->lldChannel(ipair));
              if (iterFedCon!=fedConMap.end()){
                for (unsigned int il=0;il<256;il++){
@@ -348,9 +355,9 @@ void CommissioningSourceMtcc::writePed(){
                  float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);
                  int flag = 0;					
                  if (pedestals_->getFlag(il) != 0){flag = 1;}           
-                 if (flag == 1){
-                   cout << " ped and noise for " << il << " are " << thisped << " and " << thisnoise << " Flag " << flag <<endl;
-		 }
+                 //if (flag == 1){
+		 edm::LogInfo("Commissioning")<<"[CommissioningSourceMtcc::writePed] ped and noise for " << il << " are " << thisped << " and " << thisnoise << " Flag " << flag <<endl;
+		    //}
 		 ped->setData(thisped,2,5,theSiStripVector_p);
 		 noise->setData(thisnoise,flag,theSiStripVector_n);
                }
@@ -366,10 +373,11 @@ void CommissioningSourceMtcc::writePed(){
              }
 	     if (ipair==nApv-1)  {
 	       SiStripPedestals::Range range_p(theSiStripVector_p.begin(),theSiStripVector_p.end());
+	       edm::LogInfo("Commissioning")<<"[CommissioningSourceMtcc::writePed] write pedestals for " << detid << " range " << range_p.second-range_p.first << std::endl;
 	       if ( ! ped->put(detid,range_p) )
 		 edm::LogError("Commissioning")<<"[CommissioningSourceMtcc::writePed] storing pedestals: detid already exists"<<std::endl;
-	       
 	       SiStripNoises::Range range_n(theSiStripVector_n.begin(),theSiStripVector_n.end());
+	       edm::LogInfo("Commissioning")<<"[CommissioningSourceMtcc::writePed] write noise for " << detid << " range " << range_n.second-range_n.first << std::endl;
 	       if ( ! noise->put(detid,range_n) )
 		 edm::LogError("Commissioning")<<"[CommissioningSourceMtcc::writePed] storing noise: detid already exists"<<std::endl;
 	     }
