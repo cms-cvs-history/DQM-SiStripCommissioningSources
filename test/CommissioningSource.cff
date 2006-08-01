@@ -14,7 +14,7 @@ include "IORawData/SiStripInputSources/data/TBRUInputSource.cfi"
 replace TBRUInputSource.fileNames = { "file:/afs/cern.ch/cms/cmt/onlinedev/data/RU0030349_000.root" }
 
 include "EventFilter/SiStripRawToDigi/data/RawToDigi.cfi"
-replace RawToDigi.UseFedKey = true
+replace siStripDigis.UseFedKey = true
 
 include "DQM/SiStripCommissioningSources/data/CommissioningSource.cfi"
 
