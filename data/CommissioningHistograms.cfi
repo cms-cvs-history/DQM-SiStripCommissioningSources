@@ -10,6 +10,3 @@ module CommissioningHistograms = SiStripCommissioningSource
 // untracked int32 HistoUpdateFreq:	[default=100] 		event freq with which (DQM) histos are updated
 // untracked string RootFileName:	[default="Source"]	output root filename for source histograms
 // untracked string CommissioningTask:	[default=UNDEFINED]	overrides commissioning task inferred from data stream
-
-
-
