@@ -4,11 +4,6 @@ include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
 
 include "DQM/SiStripCommon/data/MonitorDaemon.cfi"
 
-include "OnlineDB/SiStripESSources/data/FedCablingFromExampleSqliteFile.cfi"
-
-include "IORawData/SiStripInputSources/data/ReadExampleRUFile.cfi"
-#replace TBRUInputSource.fileNames = { "file:/afs/cern.ch/cms/cmt/onlinedev/data/examples/RU0030345_000.root" } // uncomment to choose different commissioning runs
-
 include "EventFilter/SiStripRawToDigi/data/FedChannelDigis.cfi"
 
 include "DQM/SiStripCommissioningSources/data/CommissioningHistograms.cfi"
