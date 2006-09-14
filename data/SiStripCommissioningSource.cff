@@ -1,0 +1,26 @@
+include "DQM/SiStripCommon/data/MessageLogger.cfi"
+
+include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
+
+include "DQM/SiStripCommon/data/MonitorDaemon.cfi"
+replace MonitorDaemon.DestinationAddress = "cmstracker003.cern.ch"
+replace MonitorDaemon.UpdateDelay = 1000
+
+include "OnlineDB/SiStripESSources/data/FedCablingFrom904ConfigDb.cfi"
+replace FedCablingFrom904ConfigDb.User = "cms_testBeam"
+replace FedCablingFrom904ConfigDb.Passwd = "May2004"
+replace FedCablingFrom904ConfigDb.Path = "cmsr"
+replace FedCablingFrom904ConfigDb.Partition = "TEL2FEDLTC"
+
+include "IORawData/SiStripInputSources/data/DaqSource.cfi"
+
+include "EventFilter/SiStripRawToDigi/data/FedChannelDigis.cfi"
+replace FedChannelDigis.TriggerFedId = 153
+
+include "DQM/SiStripCommissioningSources/data/CommissioningHistograms.cfi"
+
+include "DQM/SiStripCommon/data/PoolOutputSafe.cfi"
+
+path p = { FedChannelDigis, CommissioningHistograms }
+#endpath e = { PoolOutputSafe }
+
