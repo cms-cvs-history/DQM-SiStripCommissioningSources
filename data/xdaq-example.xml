@@ -1,0 +1,95 @@
+<xc:Partition xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xc="http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <i2o:protocol xmlns:i2o="http://xdaq.web.cern.ch/xdaq/xsd/2004/I2OConfiguration-30">
+    <i2o:target class="EVM" instance="0" tid="23"/>
+    <i2o:target class="RU"  instance="0" tid="26"/>
+    <i2o:target class="BU"  instance="0" tid="27"/>
+    <i2o:target class="FilterUnitFramework"  instance="0" tid="28"/>
+  </i2o:protocol>
+
+  <!-- Event Builder, ReadoutUnit and BuilderUnit -->
+
+  <xc:Context url="http://HOSTNAME_X:PORT_X">
+    <xc:Endpoint protocol="tcp" service="i2o" hostname="HOSTNAME_X" port="PORT_NOT_X" network="tcp1" />
+
+    <xc:Application class="PeerTransportTCP"  instance="2"  id="70" network="local">
+      <properties xmlns="urn:xdaq-application:PeerTransportTCP" xsi:type="soapenc:Struct">
+	<autoSize xsi:type="xsd:boolean">false</autoSize>
+	<maxPacketSize xsi:type="xsd:unsignedLong">256000</maxPacketSize>
+      </properties>
+    </xc:Application>
+    <xc:Module>$XDAQ_BASE/lib/linux/x86/libpttcp.so</xc:Module>
+
+    <xc:Application class="EVM" id="13" instance="0" network="tcp1">
+      <properties xmlns="urn:xdaq-application:EVM" xsi:type="soapenc:Struct">
+	<generateDummyTriggers xsi:type="xsd:boolean">false</generateDummyTriggers>
+	<taClass xsi:type="xsd:string">TrackerSupervisor</taClass>
+	<taInstance xsi:type="xsd:unsignedLong">0</taInstance>
+	<workLoopName xsi:type="xsd:string">BU/EVM/RU</workLoopName>
+      </properties>
+    </xc:Application>
+
+    <xc:Application class="RU" id="14" instance="0" network="tcp1">
+      <properties xmlns="urn:xdaq-application:RU" xsi:type="soapenc:Struct">
+	<generateDummySuperFragments xsi:type="xsd:boolean">false</generateDummySuperFragments>
+	<workLoopName xsi:type="xsd:string">BU/EVM/RU</workLoopName>
+      </properties>
+    </xc:Application>
+
+    <xc:Application class="BU" id="12" instance="0" network="tcp1">
+      <properties xmlns="urn:xdaq-application:BU" xsi:type="soapenc:Struct">
+	<dropEventData xsi:type="xsd:boolean">false</dropEventData>
+	<maxEvtsUnderConstruction xsi:type="xsd:unsignedLong">512</maxEvtsUnderConstruction>         
+	<workLoopName xsi:type="xsd:string">BU/EVM/RU</workLoopName>	
+      </properties>
+      <xc:Unicast class="FilterUnitFramework" network="tcp1"></xc:Unicast>
+    </xc:Application>
+
+    <xc:Module>/exports/xdaq/tifdev/TrackerOnline/2005/TriDAS/daq/evb/evm/lib/linux/x86/libEVM.so</xc:Module>
+    <xc:Module>/exports/xdaq/tifdev/TrackerOnline/2005/TriDAS/daq/evb/ru/lib/linux/x86/libRU.so</xc:Module>
+    <xc:Module>/exports/xdaq/tifdev/TrackerOnline/2005/TriDAS/daq/evb/bu/lib/linux/x86/libBU.so</xc:Module>
+
+  </xc:Context>
+
+  <!-- FilterUnit and EventProcessor -->
+
+  <xc:Context url="http://HOSTNAME_Y:PORT_Y">
+    <xc:Endpoint protocol="tcp" service="i2o" hostname="HOSTNAME_Y" port="PORT_NOT_Y" network="tcp1" />
+
+    <xc:Application class="PeerTransportTCP"  instance="5"  id="73" network="local">
+      <properties xmlns="urn:xdaq-application:PeerTransportTCP" xsi:type="soapenc:Struct">
+        <autoSize xsi:type="xsd:boolean">false</autoSize>
+        <maxPacketSize xsi:type="xsd:unsignedLong">256000</maxPacketSize>
+      </properties>
+    </xc:Application>
+    <xc:Module>$XDAQ_BASE/lib/linux/x86/libpttcp.so</xc:Module>
+
+    <xc:Application class="FilterUnitFramework" id="221" instance="0" network="tcp1">
+      <properties xmlns="urn:xdaq-application:FilterUnitFramework" xsi:type="soapenc:Struct">
+        <!--collectorAddr xsi:type="xsd:string">localhost</collectorAddr>-->
+        <!--fragDumpSwitch xsi:type="xsd:boolean">true</fragDumpSwitch-->
+        <!--fragDropSwitch xsi:type="xsd:boolean">true</fragDropSwitch-->
+        <workDir xsi:type="xsd:string">/tmp/</workDir>
+        <!--RootAnalyzerInstance xsi:type="xsd:integer">0</RootAnalyzerInstance-->
+      </properties>
+      <xc:Unicast class="BU" network="tcp1"></xc:Unicast>
+    </xc:Application>
+
+    <xc:Application class="evf::FUEventProcessor" id="223" instance="0" network="local">
+      <properties xmlns="urn:xdaq-application:FUEventProcessor" xsi:type="soapenc:Struct">
+        <parameterSet xsi:type="xsd:string">
+          process SiStripCommissioningSource = {
+          include "DQM/SiStripCommissioningSources/data/SiStripCommissioningSource.cff"
+          }
+        </parameterSet>
+      </properties>
+    </xc:Application>
+
+    <xc:Module>$CMSSW_BASE/lib/slc3_ia32_gcc323/libEventFilterUnit.so</xc:Module>
+    <xc:Module>$CMSSW_RELEASE_BASE/lib/slc3_ia32_gcc323/libEventFilterProcessor.so</xc:Module>
+
+  </xc:Context>
+
+</xc:Partition>
