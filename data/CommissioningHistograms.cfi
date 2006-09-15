@@ -2,8 +2,8 @@ module CommissioningHistograms = SiStripCommissioningSource
 {
     string InputModuleLabel = "FedChannelDigis"
     untracked int32 HistoUpdateFreq = 100
-    untracked string RootFileName = "SiStripCommissioningSource"
-    //untracked string CommissioningTask = "UNDEFINED"
+    untracked string RootFileName = "Source"
+    untracked string CommissioningTask = "UNDEFINED"
 }
 
 // string InputModuleLabel: 		[no default]		label of the module producing the Digis
