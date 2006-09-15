@@ -30,7 +30,7 @@ class CommissioningSourceMtcc : public edm::EDAnalyzer {
  public: // ----- public interface -----
   
   /** May of task objects, identified through FedChanelId */
-  typedef map<unsigned int, CommissioningTaskMtcc*> TaskMap;
+  typedef std::map<unsigned int, CommissioningTaskMtcc*> TaskMap;
   
   CommissioningSourceMtcc( const edm::ParameterSet& );
   ~CommissioningSourceMtcc();
@@ -48,18 +48,18 @@ class CommissioningSourceMtcc : public edm::EDAnalyzer {
   void createTask( sistrip::Task task );
   void writePed();
  private: // ----- data members -----
-  vector < pair<uint16_t, uint16_t> > rightpairs;
-  string inputModuleLabel_;
+  std::vector < std::pair<uint16_t, uint16_t> > rightpairs;
+  std::string inputModuleLabel_;
   /** Interface to Data Quality Monitoring framework. */
   DaqMonitorBEInterface* dqm_;
   /** Identifies commissioning task. */
-  string task_; 
+  std::string task_; 
   /** Map of task objects, identified through FedChanKey. */
   TaskMap tasks_;
   /** */
   int updateFreq_;
   /** */
-  string filename_;
+  std::string filename_;
   /** */
   uint32_t run_;
   /** */
@@ -70,8 +70,8 @@ class CommissioningSourceMtcc : public edm::EDAnalyzer {
   SiStripFecCabling* fecCabling_;
   /** */
 
-  string userEnv_;  
-  string passwdEnv_; 
+  std::string userEnv_;  
+  std::string passwdEnv_; 
   
   //cuts
   float cutForNoisy_;
