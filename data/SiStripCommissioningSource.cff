@@ -3,12 +3,12 @@ include "DQM/SiStripCommon/data/MessageLogger.cfi"
 include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
 
 include "DQM/SiStripCommon/data/MonitorDaemon.cfi"
-replace MonitorDaemon.DestinationAddress = "cmstracker003.cern.ch"
+replace MonitorDaemon.DestinationAddress = "cmstkint09.cern.ch"
 replace MonitorDaemon.UpdateDelay = 1000
 
 include "OnlineDB/SiStripESSources/data/FedCablingFrom904ConfigDb.cfi"
 replace FedCablingFrom904ConfigDb.ConfDb = "cms_testBeam/May2004@cmsr"
-replace FedCablingFrom904ConfigDb.Partition = "ROB_TEST_1"
+replace FedCablingFrom904ConfigDb.Partition = "TEST_241006"
 
 include "IORawData/SiStripInputSources/data/DaqSource.cfi"
 
