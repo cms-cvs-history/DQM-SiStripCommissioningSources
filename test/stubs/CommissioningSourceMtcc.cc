@@ -10,6 +10,7 @@
 #include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
 // dqm
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
+#include "DataFormats/SiStripCommon/interface/SiStripHistoNamingScheme.h"
 #include "DQM/SiStripCommissioningSources/test/stubs/SiStripHistoNamingSchemeMtcc.h"
 // conditions
 #include "CondFormats/DataRecord/interface/SiStripFedCablingRcd.h"
@@ -19,8 +20,8 @@
 // data formats
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/SiStripDigi/interface/SiStripDigi.h"
-#include "DataFormats/SiStripDetId/interface/SiStripControlKey.h"
-#include "DataFormats/SiStripDetId/interface/SiStripReadoutKey.h"
+#include "DataFormats/SiStripCommon/interface/SiStripFecKey.h"
+#include "DataFormats/SiStripCommon/interface/SiStripFedKey.h"
 // tasks
 #include "DQM/SiStripCommissioningSources/test/stubs/PedestalsTaskMtcc.h"
 // std, utilities
@@ -165,7 +166,7 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   for ( ifed = fedCabling_->feds().begin(); ifed != fedCabling_->feds().end(); ifed++ ) {
     for ( uint16_t ichan = 0; ichan < 96; ichan++ ) {
       // Create FED key and check if non-zero
-      uint32_t fed_key = SiStripReadoutKey::key( *ifed, ichan );
+      uint32_t fed_key = SiStripFedKey::key( *ifed, ichan );
       if ( fed_key ) { 
 	// Retrieve digis for given FED key and check if found
 	vector< edm::DetSet<SiStripRawDigi> >::const_iterator digis = raw->find( fed_key );
@@ -174,7 +175,7 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
 	  if ( tasks_.find(fed_key) != tasks_.end() ) { 
 	    tasks_[fed_key]->fillHistograms( *summary, *digis );
 	  } else {
-	    SiStripReadoutKey::ReadoutPath path = SiStripReadoutKey::path( fec_key );
+	    SiStripFedKey::Path path = SiStripFedKey::path( fec_key );
 	    stringstream ss;
 	    ss << "[CommissioningSourceMtcc::analyze]"
 	       << " Commissioning task with FED key " 
@@ -214,7 +215,7 @@ void CommissioningSourceMtcc::createDirs() {
 							      (*iccu).ccuAddr(),
 							      (*imodule).ccuChan() );
 	  dqm_->setCurrentFolder( dir );
-	  SiStripHistoNamingSchemeMtcc::ControlPath path = SiStripHistoNamingSchemeMtcc::controlPath( dir );
+	  SiStripFecKey::Path path = SiStripHistoNamingScheme::controlPath( dir );
 	  edm::LogInfo("Commissioning") << "[CommissioningSourceMtcc::createDirs]"
 					<< "  Created directory '" << dir 
 					<< "' using params crate/slot/ring/ccu/chan " 
@@ -265,7 +266,7 @@ void CommissioningSourceMtcc::createTask( sistrip::Task task ) {
 	    // Retrieve FED channel connection object in order to create key for task map
 	    FedChannelConnection conn = fedCabling_->connection( iconn->second.first,
 								 iconn->second.second );
-	    uint32_t fed_key = SiStripReadoutKey::key( conn.fedId(), conn.fedCh() );
+	    uint32_t fed_key = SiStripFedKey::key( conn.fedId(), conn.fedCh() );
 
 	    uint32_t key = fed_key;//cablingTask_ ? fec_key : fed_key;	    
 	    // Create commissioning task objects
@@ -349,7 +350,7 @@ void CommissioningSourceMtcc::writePed(){
              map< uint16_t, pair<uint16_t,uint16_t> >::iterator iterFedCon = fedConMap.find(imodule->lldChannel(ipair));
              if (iterFedCon!=fedConMap.end()){
                for (unsigned int il=0;il<256;il++){
-                 uint32_t fed_key = SiStripReadoutKey::key(iterFedCon->second.first,iterFedCon->second.second); 
+                 uint32_t fed_key = SiStripFedKey::key( iterFedCon->second.first, iterFedCon->second.second ); 
                  PedestalsTaskMtcc* pedestals_ = dynamic_cast<PedestalsTaskMtcc*>(tasks_[fed_key]);
                  float thisped = pedestals_->getPedestals()->getBinContent(il+1);
                  float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);

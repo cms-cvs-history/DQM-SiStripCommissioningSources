@@ -1,7 +1,7 @@
 #include "DQM/SiStripCommissioningSources/test/stubs/CommissioningTaskMtcc.h"
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "DataFormats/SiStripDetId/interface/SiStripControlKey.h"
+#include "DataFormats/SiStripCommon/interface/SiStripFecKey.h"
 
 #include <iostream>
 #include <string> 
@@ -11,8 +11,8 @@ using namespace std;
 // -----------------------------------------------------------------------------
 //
 CommissioningTaskMtcc::CommissioningTaskMtcc( DaqMonitorBEInterface* dqm,
-				      const FedChannelConnection& conn,
-				      const string& my_name ) :
+					      const FedChannelConnection& conn,
+					      const string& my_name ) :
   dqm_(dqm),
   updateFreq_(0),
   fillCntr_(0),
@@ -27,14 +27,14 @@ CommissioningTaskMtcc::CommissioningTaskMtcc( DaqMonitorBEInterface* dqm,
 			    << " Constructing object for FED id/ch " 
 			    << connection_.fedId() << "/" 
 			    << connection_.fedCh();
-  fedKey_ = SiStripReadoutKey::key( connection_.fedId(), 
-				    connection_.fedCh() );
-  fecKey_ = SiStripControlKey::key( connection_.fecCrate(),
-				    connection_.fecSlot(),
-				    connection_.fecRing(),
-				    connection_.ccuAddr(),
-				    connection_.ccuChan(),
-				    connection_.lldChannel() );
+  fedKey_ = SiStripFedKey::key( connection_.fedId(), 
+				connection_.fedCh() );
+  fecKey_ = SiStripFecKey::key( connection_.fecCrate(),
+				connection_.fecSlot(),
+				connection_.fecRing(),
+				connection_.ccuAddr(),
+				connection_.ccuChan(),
+				connection_.lldChannel() );
 }
 
 // -----------------------------------------------------------------------------
