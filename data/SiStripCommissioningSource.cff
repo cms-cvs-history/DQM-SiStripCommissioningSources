@@ -1,4 +1,5 @@
 include "DQM/SiStripCommon/data/MessageLogger.cfi"
+//include "DQM/SiStripCommon/data/Log4cplus.cff"
 
 include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
 
@@ -8,7 +9,7 @@ replace MonitorDaemon.UpdateDelay = 1000
 
 include "OnlineDB/SiStripESSources/data/FedCablingFrom904ConfigDb.cfi"
 replace FedCablingFrom904ConfigDb.ConfDb = "cms_testBeam/May2004@cmsr"
-replace FedCablingFrom904ConfigDb.Partition = "TEST_241006"
+replace FedCablingFrom904ConfigDb.Partition = "ROB_031106"
 
 include "IORawData/SiStripInputSources/data/DaqSource.cfi"
 
