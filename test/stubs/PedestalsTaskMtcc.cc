@@ -141,7 +141,7 @@ void PedestalsTaskMtcc::fill( const SiStripEventSummary& summary,
       if (ibin_cmn < nbins/2) apv = 0;
       else if (ibin_cmn >= nbins/2) apv = 1;
       
-      if ( (abs(digis.data[ibin_cmn].adc()-peds_.mePedestals_->getBinContent(ibin_cmn+1)) 
+      if ( (fabs(digis.data[ibin_cmn].adc()-peds_.mePedestals_->getBinContent(ibin_cmn+1)) 
 	  < CUTAVOIDSIGNAL * peds_.meRawNoise_->getBinContent(ibin_cmn+1)) 
 	  &&
 	  (theBadStripFinder_.downloadFlag(ibin_cmn) == 0) ) {
@@ -157,7 +157,7 @@ void PedestalsTaskMtcc::fill( const SiStripEventSummary& summary,
 		" CMN1 = " << cmn_[1] << " strip 1 " << strip_counter[1];
     // Fill vectors
     for ( uint16_t ibin = 0; ibin < nbins; ibin++ ) {
-     if  ( (abs(digis.data[ibin].adc()-peds_.mePedestals_->getBinContent(ibin+1))
+      if  ( (fabs(digis.data[ibin].adc()-peds_.mePedestals_->getBinContent(ibin+1))
           < CUTAVOIDSIGNAL * peds_.meRawNoise_->getBinContent(ibin+1) )){  // avoid possible clusters
 	//&&
 	//(theBadStripFinder_.downloadFlag(ibin) == 0) ){       
