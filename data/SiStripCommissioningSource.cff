@@ -1,5 +1,5 @@
-//include "DQM/SiStripCommon/data/MessageLogger.cfi"
 include "DQM/SiStripCommon/data/Log4cplus.cff"
+replace MessageLogger.log4cplus = { untracked string threshold = "DEBUG" }
 
 include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
 
