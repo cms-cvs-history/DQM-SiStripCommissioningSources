@@ -1,15 +1,11 @@
-include "DQM/SiStripCommon/data/MessageLogger.cfi"
-//include "DQM/SiStripCommon/data/Log4cplus.cff"
+//include "DQM/SiStripCommon/data/MessageLogger.cfi"
+include "DQM/SiStripCommon/data/Log4cplus.cff"
 
 include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
 
-include "DQM/SiStripCommon/data/MonitorDaemon.cfi"
-replace MonitorDaemon.DestinationAddress = "cmstkint09.cern.ch"
-replace MonitorDaemon.UpdateDelay = 1000
-
 include "OnlineDB/SiStripESSources/data/FedCablingFrom904ConfigDb.cfi"
-replace FedCablingFrom904ConfigDb.ConfDb = "cms_testBeam/May2004@cmsr"
-replace FedCablingFrom904ConfigDb.Partition = "ROB_031106"
+replace FedCablingFrom904ConfigDb.ConfDb = "CMS_TEC_Lyon/lyon@cmsr"
+replace FedCablingFrom904ConfigDb.Partition = "171106"
 
 include "IORawData/SiStripInputSources/data/DaqSource.cfi"
 
@@ -17,8 +13,9 @@ include "EventFilter/SiStripRawToDigi/data/FedChannelDigis.cfi"
 replace FedChannelDigis.TriggerFedId = 153
 
 include "DQM/SiStripCommissioningSources/data/CommissioningHistograms.cfi"
+replace CommissioningHistograms.HistoUpdateFreq = 20
 
-//include "DQM/SiStripCommon/data/PoolOutputSafe.cfi"
+include "DQM/SiStripCommon/data/PoolOutputSafe.cfi"
 
 //module I2O = I2OStreamConsumer {
 //    int32 max_event_size = 7000000 
@@ -30,5 +27,5 @@ include "DQM/SiStripCommissioningSources/data/CommissioningHistograms.cfi"
 //}
 
 path p = { FedChannelDigis, CommissioningHistograms }
-//endpath e = { I2O }
+//endpath e = { PoolOutputSafe }
 

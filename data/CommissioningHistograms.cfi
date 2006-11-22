@@ -6,7 +6,7 @@ module CommissioningHistograms = SiStripCommissioningSource
     untracked string CommissioningTask = "UNDEFINED"
 }
 
-// string InputModuleLabel: 		[no default]		label of the module producing the Digis
-// untracked int32 HistoUpdateFreq:	[default=100] 		event freq with which (DQM) histos are updated
-// untracked string RootFileName:	[default="Source"]	output root filename for source histograms
-// untracked string CommissioningTask:	[default=UNDEFINED]	overrides commissioning task inferred from data stream
+// InputModuleLabel: label of the module producing the Digis (should be "FedChannelDigis")
+// HistoUpdateFreq: event frequency with which (DQM) histos are updated
+// RootFileName: output root filename for "DQM source" histograms
+// CommissioningTask: overrides "commissioning task" inferred from data stream if not "UNDEFINED"
