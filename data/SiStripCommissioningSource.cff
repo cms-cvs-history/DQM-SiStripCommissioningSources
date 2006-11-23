@@ -3,14 +3,14 @@ replace MessageLogger.log4cplus = { untracked string threshold = "DEBUG" }
 
 include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
 
-include "OnlineDB/SiStripESSources/data/FedCablingFrom904ConfigDb.cfi"
-replace FedCablingFrom904ConfigDb.ConfDb = "CMS_TEC_Lyon/lyon@cmsr"
-replace FedCablingFrom904ConfigDb.Partition = "171106"
+include "OnlineDB/SiStripESSources/data/FedCablingFromConfigDb.cfi"
+replace FedCablingFromConfigDb.ConfDb = ""
+replace FedCablingFromConfigDb.Partition = ""
 
 include "IORawData/SiStripInputSources/data/DaqSource.cfi"
 
 include "EventFilter/SiStripRawToDigi/data/FedChannelDigis.cfi"
-replace FedChannelDigis.TriggerFedId = 153
+replace FedChannelDigis.TriggerFedId = -1
 
 include "DQM/SiStripCommissioningSources/data/CommissioningHistograms.cfi"
 replace CommissioningHistograms.HistoUpdateFreq = 20
