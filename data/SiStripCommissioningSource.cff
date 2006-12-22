@@ -28,4 +28,3 @@ include "DQM/SiStripCommon/data/PoolOutputSafe.cfi"
 
 path p = { FedChannelDigis, CommissioningHistograms }
 //endpath e = { PoolOutputSafe }
-
