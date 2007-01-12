@@ -1,0 +1,9 @@
+module I2O = I2OStreamConsumer {
+    int32 max_event_size = 7000000 
+    int32 max_queue_depth = 5
+    string DestinationName = "testStorageManager"
+    bool use_compression = true
+    int32 compression_level = 1
+    untracked int32 lumiSection_interval = 600
+}
+

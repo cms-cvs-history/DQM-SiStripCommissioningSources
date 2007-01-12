@@ -1,0 +1,21 @@
+include "DQM/SiStripCommon/data/Log4cplus.cff"
+replace MessageLogger.log4cplus = { untracked string threshold = "DEBUG" }
+
+include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
+
+include "OnlineDB/SiStripESSources/data/FedCablingFromConfigDb.cfi"
+replace FedCablingFromConfigDb.ConfDb = ""
+replace FedCablingFromConfigDb.Partition = ""
+
+include "IORawData/SiStripInputSources/data/DaqSource.cfi"
+
+include "EventFilter/SiStripRawToDigi/data/FedChannelDigis.cfi"
+replace FedChannelDigis.TriggerFedId = -1
+
+include "DQM/SiStripCommissioningSources/data/CommissioningHistos.cfi"
+replace CommissioningHistos.HistoUpdateFreq = 20
+
+include "DQM/SiStripCommissioningSources/data/StreamProducer.cfi"
+
+path p1 = { FedChannelDigis, CommissioningHistos, StreamProducer } 
+

@@ -1,0 +1,4 @@
+module StreamProducer = StreamThingProducer {
+    int32 array_size = 20000
+    int32 instance_count = 11
+}

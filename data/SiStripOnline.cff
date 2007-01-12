@@ -1,0 +1,5 @@
+// Commissioning chain with StorageManager
+include "DQM/SiStripCommissioningSources/data/Commissioning.cff"
+
+// Monitoring chain with zero-suppresion and clusterization
+//include "DQM/SiStripCommissioningSources/data/Monitoring.cff"

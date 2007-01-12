@@ -1,0 +1,12 @@
+include "DQM/SiStripCommon/data/MessageLogger.cfi"
+
+include "DQM/SiStripCommon/data/DaqMonitorROOTBackEnd.cfi"
+
+include "DQM/SiStripCommon/data/MonitorDaemon.cfi"
+
+include "EventFilter/SiStripRawToDigi/data/FedChannelDigis.cfi"
+
+include "DQM/SiStripCommissioningSources/data/CommissioningHistos.cfi"
+
+include "DQM/SiStripCommon/data/PoolOutputSafe.cfi"
+
