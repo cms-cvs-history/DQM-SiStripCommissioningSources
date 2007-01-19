@@ -1,0 +1,12 @@
+source = EventStreamHttpReader {
+    
+    untracked int32 maxEvents = -1
+    string sourceURL = "http://lyopc419.cern.ch:40334/urn:xdaq-application:lid=50"
+    int32 max_event_size = 10000000 // <- 10MB
+    int32 max_queue_depth = 5
+    untracked string consumerName = "SiStripConsumer"
+    untracked string consumerPriority = "normal"
+    untracked int32 headerRetryInterval = 3 // seconds
+    untracked double maxEventRequestRate = 10. // hertz
+    
+}

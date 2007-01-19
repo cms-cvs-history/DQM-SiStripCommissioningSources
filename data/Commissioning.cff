@@ -15,7 +15,5 @@ replace FedChannelDigis.TriggerFedId = -1
 include "DQM/SiStripCommissioningSources/data/CommissioningHistos.cfi"
 replace CommissioningHistos.HistoUpdateFreq = 20
 
-include "DQM/SiStripCommissioningSources/data/StreamProducer.cfi"
-
-path p1 = { FedChannelDigis, CommissioningHistos, StreamProducer } 
+path p1 = { FedChannelDigis, CommissioningHistos } 
 
