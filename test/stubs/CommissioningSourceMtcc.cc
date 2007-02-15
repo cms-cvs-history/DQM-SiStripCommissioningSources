@@ -394,18 +394,12 @@ void CommissioningSourceMtcc::writePed(){
   
   if( mydbservice.isAvailable() ){
     try{
+      size_t PedCallbackToken=mydbservice->callbackToken("SiStripPedestals");
+      size_t NoiseCallbackToken=mydbservice->callbackToken("SiStripNoises");
       edm::LogInfo("Commissioning")<<"current time "<<mydbservice->currentTime()<<std::endl;
       edm::LogInfo("Commissioning")<<"end of time "<<mydbservice->endOfTime()<<std::endl;
-	if(mydbservice->isNewTagRequest("SiStripPedestalsRcd")){
-		mydbservice->createNewIOV<SiStripPedestals>(ped,mydbservice->endOfTime(),"SiStripPedestalsRcd");
-	} else {
-		mydbservice->appendSinceTime<SiStripPedestals>(ped,mydbservice->currentTime(),"SiStripPedestalsRcd");
-	}
-	if(mydbservice->isNewTagRequest("SiStripNoisesRcd")){
-                mydbservice->createNewIOV<SiStripNoises>(noise,mydbservice->endOfTime(),"SiStripNoisesRcd");
-        } else {
-                mydbservice->appendSinceTime<SiStripNoises>(noise,mydbservice->currentTime(),"SiStripNoisesRcd");
-        }
+      mydbservice->newValidityForNewPayload<SiStripPedestals>(ped,mydbservice->endOfTime(),PedCallbackToken);
+      mydbservice->newValidityForNewPayload<SiStripNoises>(noise,mydbservice->endOfTime(),NoiseCallbackToken);
     }catch(const cond::Exception& er){
       edm::LogError("Commissioning")<<er.what()<<std::endl;
     }catch(const std::exception& er){
