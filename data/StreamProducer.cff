@@ -1,3 +1,0 @@
-include "DQM/SiStripCommissioningSources/data/StreamProducer.cfi"
-path p2 = { StreamProducer } 
-

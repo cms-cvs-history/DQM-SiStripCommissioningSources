@@ -1,0 +1,2 @@
+include "DQM/SiStripCommissioningSources/data/EventStreamReader.cfi"
+service = LockService { untracked vstring labels = { "source" } } 
