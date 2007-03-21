@@ -137,9 +137,9 @@ const uint32_t& CommissioningTaskMtcc::fecKey() const { return fecKey_; }
 const uint32_t& CommissioningTaskMtcc::fedKey() const { return fedKey_; }
 
 void CommissioningTaskMtcc::fedChannel( const uint32_t& fed_key ) { 
-  SiStripFedKey::Path path = SiStripFedKey::path( fed_key ); 
-  fedChannel_.first  = path.fedId_; 
-  fedChannel_.second = path.fedCh_;
+  SiStripFedKey path( fed_key ); 
+  fedChannel_.first  = path.fedId(); 
+  fedChannel_.second = path.fedChannel();
 }
 const uint32_t& CommissioningTaskMtcc::fedId() const { return fedChannel_.first; }
 const uint32_t& CommissioningTaskMtcc::fedCh() const { return fedChannel_.second; }

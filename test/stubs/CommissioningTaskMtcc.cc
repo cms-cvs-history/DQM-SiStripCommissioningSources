@@ -27,14 +27,15 @@ CommissioningTaskMtcc::CommissioningTaskMtcc( DaqMonitorBEInterface* dqm,
 			    << " Constructing object for FED id/ch " 
 			    << connection_.fedId() << "/" 
 			    << connection_.fedCh();
-  fedKey_ = SiStripFedKey::key( connection_.fedId(), 
-				connection_.fedCh() );
-  fecKey_ = SiStripFecKey::key( connection_.fecCrate(),
-				connection_.fecSlot(),
-				connection_.fecRing(),
-				connection_.ccuAddr(),
-				connection_.ccuChan(),
-				connection_.lldChannel() );
+  fedKey_ = SiStripFedKey( connection_.fedId(), 
+			   SiStripFedKey::feUnit(connection_.fedCh()),
+			   SiStripFedKey::feChan(connection_.fedCh()) ).key();
+  fecKey_ = SiStripFecKey( connection_.fecCrate(),
+			   connection_.fecSlot(),
+			   connection_.fecRing(),
+			   connection_.ccuAddr(),
+			   connection_.ccuChan(),
+			   connection_.lldChannel() ).key();
 }
 
 // -----------------------------------------------------------------------------

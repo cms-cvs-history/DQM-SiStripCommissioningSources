@@ -9,7 +9,7 @@
 #include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
 // dqm
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
-#include "DataFormats/SiStripCommon/interface/SiStripHistoNamingScheme.h"
+#include "DataFormats/SiStripCommon/interface/SiStripEnumsAndStrings.h"
 #include "DQM/SiStripCommissioningSources/test/stubs/SiStripHistoNamingSchemeMtcc.h"
 // conditions
 #include "CondFormats/DataRecord/interface/SiStripFedCablingRcd.h"
@@ -120,22 +120,22 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   if ( event.id().run() != run_ ) { run_ = event.id().run(); }
  
   // Create commissioning task objects 
-  if ( firstEvent_ ) { createTask( summary->task() ); firstEvent_ = false; }
+  if ( firstEvent_ ) { createTask( summary->runType() ); firstEvent_ = false; }
  
   edm::Handle< edm::DetSetVector<SiStripRawDigi> > raw;
   //edm::Handle< edm::DetSetVector<SiStripDigi> > zs;
 
   
-  if ( summary->fedReadoutMode() == sistrip::VIRGIN_RAW ) {
+  if ( summary->fedReadoutMode() == sistrip::FED_VIRGIN_RAW ) {
     event.getByLabel( inputModuleLabel_, "VirginRaw", raw );
     //std::cout << " sono in virgin" << std::endl;
-  } else if ( summary->fedReadoutMode() == sistrip::PROC_RAW ) {
+  } else if ( summary->fedReadoutMode() == sistrip::FED_PROC_RAW ) {
     event.getByLabel( inputModuleLabel_, "ProcRaw", raw );
     //std::cout << " sono in processed" << std::endl; 
- } else if ( summary->fedReadoutMode() == sistrip::SCOPE_MODE ) {
+ } else if ( summary->fedReadoutMode() == sistrip::FED_SCOPE_MODE ) {
     event.getByLabel( inputModuleLabel_, "ScopeMode", raw );
     //std::cout << " sono in scope" << std::endl;
-  } else if ( summary->fedReadoutMode() == sistrip::ZERO_SUPPR ) {
+  } else if ( summary->fedReadoutMode() == sistrip::FED_ZERO_SUPPR ) {
     //event.getByLabel( inputModuleLabel_, "ZeroSuppr", zs );
   } else {
     edm::LogError("CommissioningSourceMtcc") << "[CommissioningSourceMtcc::analyze]"
@@ -165,7 +165,7 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
   for ( ifed = fedCabling_->feds().begin(); ifed != fedCabling_->feds().end(); ifed++ ) {
     for ( uint16_t ichan = 0; ichan < 96; ichan++ ) {
       // Create FED key and check if non-zero
-      uint32_t fed_key = SiStripFedKey::key( *ifed, ichan );
+      uint32_t fed_key = SiStripFedKey( *ifed, SiStripFedKey::feUnit(ichan), SiStripFedKey::feChan(ichan) ).key();
       if ( fed_key ) { 
 	// Retrieve digis for given FED key and check if found
 	vector< edm::DetSet<SiStripRawDigi> >::const_iterator digis = raw->find( fed_key );
@@ -174,14 +174,14 @@ void CommissioningSourceMtcc::analyze( const edm::Event& event,
 	  if ( tasks_.find(fed_key) != tasks_.end() ) { 
 	    tasks_[fed_key]->fillHistograms( *summary, *digis );
 	  } else {
-	    SiStripFedKey::Path path = SiStripFedKey::path( fec_key );
+	    SiStripFedKey path( fec_key );
 	    stringstream ss;
 	    ss << "[CommissioningSourceMtcc::analyze]"
 	       << " Commissioning task with FED key " 
 	       << hex << setfill('0') << setw(8) << fed_key << dec
 	       << " and FED id/ch " 
-	       << path.fedId_ << "/"
-	       << path.fedCh_ 
+	       << path.fedId() << "/"
+	       << path.fedChannel() 
 	       << " not found in list!"; 
 	    edm::LogError("Commissioning") << ss.str();
 	  }
@@ -214,7 +214,7 @@ void CommissioningSourceMtcc::createDirs() {
 							      (*iccu).ccuAddr(),
 							      (*imodule).ccuChan() );
 	  dqm_->setCurrentFolder( dir );
-	  SiStripFecKey::Path path = SiStripHistoNamingScheme::controlPath( dir );
+	  SiStripFecKey path( dir );
 	  edm::LogInfo("Commissioning") << "[CommissioningSourceMtcc::createDirs]"
 					<< "  Created directory '" << dir 
 					<< "' using params crate/slot/ring/ccu/chan " 
@@ -232,7 +232,7 @@ void CommissioningSourceMtcc::createDirs() {
 
 // -----------------------------------------------------------------------------
 //
-void CommissioningSourceMtcc::createTask( sistrip::Task task ) {
+void CommissioningSourceMtcc::createTask( sistrip::RunType task ) {
   LogDebug("Commissioning") << "[CommissioningSourceMtcc::createTask]";
   
   // Check DQM service is available
@@ -243,7 +243,7 @@ void CommissioningSourceMtcc::createTask( sistrip::Task task ) {
   }
 
   // Check commissioning task is known
-  if ( task == sistrip::UNKNOWN_TASK && task_ == "UNKNOWN" ) {
+  if ( task == sistrip::UNKNOWN_RUN_TYPE && task_ == "UNKNOWN" ) {
     edm::LogError("Commissioning") << "[CommissioningSourceMtcc::createTask] Unknown commissioning task!"; 
     return; 
   }
@@ -265,7 +265,9 @@ void CommissioningSourceMtcc::createTask( sistrip::Task task ) {
 	    // Retrieve FED channel connection object in order to create key for task map
 	    FedChannelConnection conn = fedCabling_->connection( iconn->second.first,
 								 iconn->second.second );
-	    uint32_t fed_key = SiStripFedKey::key( conn.fedId(), conn.fedCh() );
+	    uint32_t fed_key = SiStripFedKey( conn.fedId(), 
+					      SiStripFedKey::feUnit(conn.fedCh()),
+					      SiStripFedKey::feChan(conn.fedCh()) ).key();
 
 	    uint32_t key = fed_key;//cablingTask_ ? fec_key : fed_key;	    
 	    // Create commissioning task objects
@@ -282,7 +284,7 @@ void CommissioningSourceMtcc::createTask( sistrip::Task task ) {
 													cutForNoisy_, 
 													cutForDead_, 
 													cutForNonGausTails_ ); }
-		else if ( task == sistrip::UNKNOWN_TASK ) {
+		else if ( task == sistrip::UNKNOWN_RUN_TYPE ) {
 		  edm::LogError("Commissioning") << "[CommissioningSourceMtcc::createTask]"
 						 << " Unknown commissioning task in data stream! " << task_;
 		}
@@ -349,7 +351,9 @@ void CommissioningSourceMtcc::writePed(){
              map< uint16_t, pair<uint16_t,uint16_t> >::iterator iterFedCon = fedConMap.find(imodule->lldChannel(ipair));
              if (iterFedCon!=fedConMap.end()){
                for (unsigned int il=0;il<256;il++){
-                 uint32_t fed_key = SiStripFedKey::key( iterFedCon->second.first, iterFedCon->second.second ); 
+                 uint32_t fed_key = SiStripFedKey( iterFedCon->second.first, 
+						   SiStripFedKey::feUnit(iterFedCon->second.second),
+						   SiStripFedKey::feChan(iterFedCon->second.second) ).key();
                  PedestalsTaskMtcc* pedestals_ = dynamic_cast<PedestalsTaskMtcc*>(tasks_[fed_key]);
                  float thisped = pedestals_->getPedestals()->getBinContent(il+1);
                  float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);
