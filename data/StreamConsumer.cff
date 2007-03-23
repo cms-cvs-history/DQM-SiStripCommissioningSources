@@ -1,2 +1,0 @@
-include "DQM/SiStripCommissioningSources/data/StreamConsumer.cfi"
-endpath streamconsumer = { StreamConsumer }
