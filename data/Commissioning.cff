@@ -13,7 +13,7 @@ include "EventFilter/SiStripRawToDigi/data/FedChannelDigis.cfi"
 replace FedChannelDigis.TriggerFedId = -1
 
 include "DQM/SiStripCommissioningSources/data/CommissioningHistos.cfi"
-replace CommissioningHistos.HistoUpdateFreq = 20
+replace CommissioningHistos.HistoUpdateFreq = 10
 
 path p1 = { FedChannelDigis, CommissioningHistos } 
 
