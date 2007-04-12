@@ -15,7 +15,7 @@
 <use name=CondCore/DBOutputService>
 <library file="stubs/*.cc" name=DQMSiStripCommissioningSourcesMtcc>
 <flags CXXFLAGS="-g">
-<flags SEAL_PLUGIN_NAME="DQMSiStripCommissioningSourcesMtcc">
+<flags EDM_PLUGIN=1>
 </library>
 
 <export>
