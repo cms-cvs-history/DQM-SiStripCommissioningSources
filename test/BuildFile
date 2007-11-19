@@ -1,35 +1,26 @@
-<use name=FWCore/Framework>
-<use name=FWCore/ParameterSet>
-<use name=FWCore/MessageLogger>
-<use name=FWCore/PluginManager>
-<use name=DQMServices/Core>
-<use name=DQM/SiStripCommon>
-<use name=CondFormats/DataRecord>
-<use name=CondFormats/SiStripObjects>
-<use name=CalibFormats/SiStripObjects>
-<use name=DataFormats/Common>
-<use name=DataFormats/SiStripCommon>
-<use name=DataFormats/SiStripDigi>
-<use name=boost>
-<use name=CondCore/DBOutputService>
 <library file="stubs/*.cc" name=DQMSiStripCommissioningSourcesMtcc>
-<flags CXXFLAGS="-g">
-<flags EDM_PLUGIN=1>
+  <use name=CalibFormats/SiStripObjects>
+  <use name=CondCore/DBOutputService>
+  <use name=CondFormats/DataRecord>
+  <use name=CondFormats/SiStripObjects>
+  <use name=DataFormats/Common>
+  <use name=DataFormats/SiStripCommon>
+  <use name=DataFormats/SiStripDigi>
+  <use name=DQM/SiStripCommon>
+  <use name=DQMServices/Core>
+  <use name=FWCore/Framework>
+  <use name=FWCore/MessageLogger>
+  <use name=FWCore/ParameterSet>
+  <use name=FWCore/PluginManager>
+  <use name=boost>
+  <flags EDM_PLUGIN=1>
 </library>
 
-<export>
-   <lib name=DQMSiStripCommissioningSourcesMtcc> 
-   <use name=FWCore/Framework>
-   <use name=FWCore/ParameterSet>
-   <use name=FWCore/MessageLogger>
-   <use name=DQMServices/Core>
-   <use name=DQM/SiStripCommon>
-   <use name=CondFormats/DataRecord>
-   <use name=CondFormats/SiStripObjects>
-   <use name=CalibFormats/SiStripObjects>
-   <use name=DataFormats/Common>
-   <use name=DataFormats/SiStripCommon>
-   <use name=DataFormats/SiStripDigi>
-   <use name=boost>
-   <use name=CondCore/DBOutputService>
-</export>
+<library file="plugins/*.cc" name=testDQMSiStripCommissioningSourcesPlugins>
+  <use name=FWCore/Framework>
+  <use name=FWCore/ParameterSet>
+  <use name=FWCore/MessageLogger>
+  <use name=DataFormats/SiStripCommon>
+  <use name=boost>
+  <flags EDM_PLUGIN=1>
+</library>
