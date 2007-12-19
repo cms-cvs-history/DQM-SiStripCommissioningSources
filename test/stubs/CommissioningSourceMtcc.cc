@@ -259,12 +259,12 @@ void CommissioningSourceMtcc::createTask( sistrip::RunType task ) {
 							      (*iccu).ccuAddr(),
 							      (*imodule).ccuChan() );
 	  dqm_->setCurrentFolder( dir );
-	  map< uint16_t, pair<uint16_t,uint16_t> >::const_iterator iconn;
+	  map< uint16_t, SiStripModule::FedChannel >::const_iterator iconn;
 	  for ( iconn = imodule->fedChannels().begin(); iconn != imodule->fedChannels().end(); iconn++ ) {
-	    if ( !(iconn->second.first) ) { continue; }
+	    if ( !(iconn->second.fedId_) ) { continue; }
 	    // Retrieve FED channel connection object in order to create key for task map
-	    FedChannelConnection conn = fedCabling_->connection( iconn->second.first,
-								 iconn->second.second );
+	    FedChannelConnection conn = fedCabling_->connection( iconn->second.fedId_,
+								 iconn->second.fedCh_ );
 	    uint32_t fed_key = SiStripFedKey( conn.fedId(), 
 					      SiStripFedKey::feUnit(conn.fedCh()),
 					      SiStripFedKey::feChan(conn.fedCh()) ).key();
@@ -339,7 +339,7 @@ void CommissioningSourceMtcc::writePed(){
     for ( vector<SiStripRing>::const_iterator iring = (*ifec).rings().begin(); iring != (*ifec).rings().end(); iring++ ) {
       for ( vector<SiStripCcu>::const_iterator iccu = (*iring).ccus().begin(); iccu != (*iring).ccus().end(); iccu++ ) {
         for ( vector<SiStripModule>::const_iterator imodule = (*iccu).modules().begin(); imodule != (*iccu).modules().end(); imodule++ ){
-          map< uint16_t, pair<uint16_t,uint16_t> > fedConMap = imodule->fedChannels();
+          map< uint16_t, SiStripModule::FedChannel > fedConMap = imodule->fedChannels();
     	  uint32_t detid= imodule->detId();
           uint16_t nApv= imodule->nApvPairs();
           for (uint16_t ipair = 0; ipair < nApv; ipair++){
@@ -348,12 +348,12 @@ void CommissioningSourceMtcc::writePed(){
               theSiStripVector_n.clear();
              }
 	     edm::LogInfo("Commissioning")<<"[CommissioningSourceMtcc::writePed] detid " << detid << " napvpairs " << nApv << " ipair " << ipair << std::endl;
-             map< uint16_t, pair<uint16_t,uint16_t> >::iterator iterFedCon = fedConMap.find(imodule->lldChannel(ipair));
+             map< uint16_t, SiStripModule::FedChannel >::iterator iterFedCon = fedConMap.find(imodule->lldChannel(ipair));
              if (iterFedCon!=fedConMap.end()){
                for (unsigned int il=0;il<256;il++){
-                 uint32_t fed_key = SiStripFedKey( iterFedCon->second.first, 
-						   SiStripFedKey::feUnit(iterFedCon->second.second),
-						   SiStripFedKey::feChan(iterFedCon->second.second) ).key();
+                 uint32_t fed_key = SiStripFedKey( iterFedCon->second.fedId_, 
+						   SiStripFedKey::feUnit(iterFedCon->second.fedCh_),
+						   SiStripFedKey::feChan(iterFedCon->second.fedCh_) ).key();
                  PedestalsTaskMtcc* pedestals_ = dynamic_cast<PedestalsTaskMtcc*>(tasks_[fed_key]);
                  float thisped = pedestals_->getPedestals()->getBinContent(il+1);
                  float thisnoise = pedestals_->getCMSnoise()->getBinContent(il+1);
