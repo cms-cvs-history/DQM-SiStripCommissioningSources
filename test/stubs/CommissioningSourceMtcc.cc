@@ -1,37 +1,26 @@
 #include "DQM/SiStripCommissioningSources/test/stubs/CommissioningSourceMtcc.h"
 // edm
-#include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
 // dqm
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
-#include "DataFormats/SiStripCommon/interface/SiStripEnumsAndStrings.h"
 #include "DQM/SiStripCommissioningSources/test/stubs/SiStripHistoNamingSchemeMtcc.h"
 // conditions
-#include "CondFormats/DataRecord/interface/SiStripFedCablingRcd.h"
-#include "CondFormats/SiStripObjects/interface/SiStripFedCabling.h"
 // calibrations
-#include "CalibFormats/SiStripObjects/interface/SiStripFecCabling.h"
 // data formats
 #include "DataFormats/Common/interface/DetSetVector.h"
-#include "DataFormats/SiStripDigi/interface/SiStripDigi.h"
 #include "DataFormats/SiStripCommon/interface/SiStripFecKey.h"
 #include "DataFormats/SiStripCommon/interface/SiStripFedKey.h"
 // tasks
 #include "DQM/SiStripCommissioningSources/test/stubs/PedestalsTaskMtcc.h"
 // std, utilities
-#include <boost/cstdint.hpp>
 #include <memory>
 #include <vector>
 #include <sstream>
 #include <iomanip>
 
-#include <string>
-#include <map>
 
 using namespace std;
 

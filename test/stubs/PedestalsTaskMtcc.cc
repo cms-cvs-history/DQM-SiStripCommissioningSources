@@ -1,7 +1,6 @@
 #include "DQM/SiStripCommissioningSources/test/stubs/PedestalsTaskMtcc.h"
 #include "DQM/SiStripCommissioningSources/test/stubs/SiStripHistoNamingSchemeMtcc.h"
 #include "DQMServices/Core/interface/DaqMonitorBEInterface.h"
-#include "CalibFormats/SiStripObjects/interface/SiStripFecCabling.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include <math.h>
 #ifndef STRIPPERCOUPLE

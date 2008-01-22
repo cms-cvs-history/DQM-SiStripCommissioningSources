@@ -1,11 +1,10 @@
-// Last commit: $Id: $
+// Last commit: $Id: testSiStripCommissioningSource.cc,v 1.1 2007/11/19 17:26:44 bainbrid Exp $
 
 #include "DQM/SiStripCommissioningSources/test/plugins/testSiStripCommissioningSource.h"
 #include "FWCore/Framework/interface/Event.h" 
 #include "DataFormats/SiStripCommon/interface/SiStripConstants.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include <iostream>
-#include <sstream>
 #include <sys/types.h>
 #include <unistd.h>
 #include <iomanip>

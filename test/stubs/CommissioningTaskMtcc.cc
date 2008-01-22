@@ -4,7 +4,6 @@
 #include "DataFormats/SiStripCommon/interface/SiStripFecKey.h"
 
 #include <iostream>
-#include <string> 
 
 using namespace std;
 
