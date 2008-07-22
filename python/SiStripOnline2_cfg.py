@@ -152,7 +152,7 @@ process.digis = cms.EDProducer("SiStripRawToDigiModule",
     CreateDigis = cms.untracked.bool(True)
 )
 
-process.trackingRunTypeFilter = cms.EDAnalyzer("SiStripCommissioningRunTypeFilter",
+process.trackingRunTypeFilter = cms.EDFilter("SiStripCommissioningRunTypeFilter",
     runTypes = cms.vstring('ApvLatency', 
         'FineDelay'),
     InputModuleLabel = cms.InputTag("digis")
