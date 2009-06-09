@@ -15,6 +15,11 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 process.DQMStore = cms.Service("DQMStore")
+process.PrescaleService = cms.Service("PrescaleService",
+    lvl1Labels = cms.vstring('DEFAULT'),
+    prescaleTable = cms.VPSet()
+)
+process.ModuleWebRegistry = cms.Service("ModuleWebRegistry")
 
 process.FUShmDQMOutputService = cms.Service("FUShmDQMOutputService",
     initialMessageBufferSize = cms.untracked.int32(1000000),
