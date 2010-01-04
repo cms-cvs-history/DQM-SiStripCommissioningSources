@@ -106,7 +106,7 @@ DQMStore* const SiStripCommissioningSource::dqm( std::string method ) const {
 // Retrieve DQM interface, control cabling and "control view" utility
 // class, create histogram directory structure and generate "reverse"
 // control cabling.
-void SiStripCommissioningSource::beginJob( const edm::EventSetup& setup ) {
+void SiStripCommissioningSource::beginRun( edm::Run const & run, const edm::EventSetup & setup );
   LogTrace(mlDqmSource_)
     << "[SiStripCommissioningSource::" << __func__ << "]"
     << " Configuring..." << std::endl;
@@ -162,7 +162,7 @@ void SiStripCommissioningSource::beginJob( const edm::EventSetup& setup ) {
 
 // -----------------------------------------------------------------------------
 //
-void SiStripCommissioningSource::endJob() {
+void SiStripCommissioningSource::endRun() {
   LogTrace(mlDqmSource_)
     << "[SiStripCommissioningSource::" << __func__ << "]"
     << " Halting..." << std::endl;
