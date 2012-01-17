@@ -13,7 +13,7 @@
 //
 // Original Author:  Christophe DELAERE
 //         Created:  Fri Nov 17 10:52:42 CET 2006
-// $Id: SiStripFineDelayHit.cc,v 1.13 2010/01/04 18:17:30 lowette Exp $
+// $Id: SiStripFineDelayHit.cc,v 1.16 2011/05/20 17:17:25 wmtan Exp $
 //
 //
 
@@ -34,7 +34,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/Common/interface/Ref.h"
-#include "DataFormats/Common/interface/EDProduct.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -93,7 +92,6 @@ SiStripFineDelayHit::SiStripFineDelayHit(const edm::ParameterSet& iConfig):event
    anglefinder_=new SiStripFineDelayTLA(iConfig);
    cosmic_ = iConfig.getParameter<bool>("cosmic");
    field_ = iConfig.getParameter<bool>("MagneticField");
-   trajInEvent_ = iConfig.getParameter<bool>("TrajInEvent");
    maxAngle_ = iConfig.getParameter<double>("MaxTrackAngle");
    minTrackP2_ = iConfig.getParameter<double>("MinTrackMomentum")*iConfig.getParameter<double>("MinTrackMomentum");
    maxClusterDistance_ = iConfig.getParameter<double>("MaxClusterDistance");
@@ -168,35 +166,23 @@ std::vector< std::pair<uint32_t,std::pair<double, double> > > SiStripFineDelayHi
   // now loop on recHits to find the right detId plus the track local angle
   std::vector<std::pair< std::pair<DetId, LocalPoint> ,float> > hitangle;
   if(!cosmic_) {
-    if(!trajInEvent_) {
-      //use the track. It will be refitted by the angleFinder
-      hitangle = anglefinder_->findtrackangle(*tk);
-    }
-    else {
-      // use trajectories in event.
-      // we have first to find the right trajectory for the considered track.
-      for(std::vector<Trajectory>::const_iterator traj = trajVec.begin(); traj< trajVec.end(); ++traj) {
-        if(
- 	   ((traj->lastMeasurement().recHit()->geographicalId().rawId() == (*(tk->recHitsEnd()-1))->geographicalId().rawId()) &&
-	   ( traj->lastMeasurement().recHit()->localPosition().x() == (*(tk->recHitsEnd()-1))->localPosition().x())               ) ||
-	   ((traj->firstMeasurement().recHit()->geographicalId().rawId() == (*(tk->recHitsEnd()-1))->geographicalId().rawId()) &&
-	   ( traj->firstMeasurement().recHit()->localPosition().x() == (*(tk->recHitsEnd()-1))->localPosition().x())              )   ) {
-             hitangle = anglefinder_->findtrackangle(*traj);
-	     break;
-	}
+    // use trajectories in event.
+    // we have first to find the right trajectory for the considered track.
+    for(std::vector<Trajectory>::const_iterator traj = trajVec.begin(); traj< trajVec.end(); ++traj) {
+      if(
+        ((traj->lastMeasurement().recHit()->geographicalId().rawId() == (*(tk->recHitsEnd()-1))->geographicalId().rawId()) &&
+        ( traj->lastMeasurement().recHit()->localPosition().x() == (*(tk->recHitsEnd()-1))->localPosition().x())               ) ||
+        ((traj->firstMeasurement().recHit()->geographicalId().rawId() == (*(tk->recHitsEnd()-1))->geographicalId().rawId()) &&
+        ( traj->firstMeasurement().recHit()->localPosition().x() == (*(tk->recHitsEnd()-1))->localPosition().x())              )   ) {
+          hitangle = anglefinder_->findtrackangle(*traj);
+          break;
       }
     }
   } else {
     edm::Handle<TrajectorySeedCollection> seedcoll;
     event_->getByLabel(seedLabel_,seedcoll);
-    if(!trajInEvent_) {
-      //use the track. It will be refitted by the angleFinder
-      hitangle = anglefinder_->findtrackangle((*(*seedcoll).begin()),*tk);
-    }
-    else {
-      // use trajectories in event.
-      hitangle = anglefinder_->findtrackangle(trajVec);
-    }
+    // use trajectories in event.
+    hitangle = anglefinder_->findtrackangle(trajVec);
   }
   LogDebug("DetId") << "number of hits for the track: " << hitangle.size();
   std::vector<std::pair< std::pair<DetId, LocalPoint> ,float> >::iterator iter;
@@ -255,6 +241,8 @@ bool SiStripFineDelayHit::rechit(reco::Track* tk,uint32_t det_id)
   return false;
 }
 
+// VI January 2012: FIXME
+// do not understand what is going on here: each hit has a cluster: by definition will be the closest!
 std::pair<const SiStripCluster*,double> SiStripFineDelayHit::closestCluster(const TrackerGeometry& tracker,const reco::Track* tk,const uint32_t& det_id ,const edmNew::DetSetVector<SiStripCluster>& clusters, const edm::DetSetVector<SiStripDigi>& hits)
 {
   std::pair<const SiStripCluster*,double> result(NULL,0.);
@@ -274,6 +262,7 @@ std::pair<const SiStripCluster*,double> SiStripFineDelayHit::closestCluster(cons
       nstrips = (dynamic_cast<const StripTopology*>(&(gdu->topology())))->nstrips();
       break;
     }
+    /* FIXME: local position is not there anymore...
     //handle stereo part of matched hits
     //one could try to cast to SiStripMatchedRecHit2D but it is faster to look at the detid
     else if((det_id - (*it)->geographicalId().rawId())==1) {
@@ -306,6 +295,7 @@ std::pair<const SiStripCluster*,double> SiStripFineDelayHit::closestCluster(cons
       nstrips = (dynamic_cast<const StripTopology*>(&(gdu->topology())))->nstrips();
       break;
     }
+    */
   }
   LogDebug("closestCluster") << " hit strip = " << hitStrip;
   if(hitStrip<0) return result;
@@ -399,11 +389,9 @@ SiStripFineDelayHit::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      const edmNew::DetSetVector<SiStripCluster>* clusterSet = clusters.product();
      // look at the trajectories if they are in the event
      std::vector<Trajectory> trajVec;
-     if(trajInEvent_) {
-       edm::Handle<std::vector<Trajectory> > TrajectoryCollection;
-       iEvent.getByLabel(trackLabel_,TrajectoryCollection);
-       trajVec = *(TrajectoryCollection.product());
-     }	       
+     edm::Handle<std::vector<Trajectory> > TrajectoryCollection;
+     iEvent.getByLabel(trackLabel_,TrajectoryCollection);
+     trajVec = *(TrajectoryCollection.product());
      // loop on tracks
      for(reco::TrackCollection::const_iterator itrack = tracks->begin(); itrack<tracks->end(); itrack++) {
        // first check the track Pt
